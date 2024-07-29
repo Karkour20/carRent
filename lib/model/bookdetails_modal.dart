@@ -37,6 +37,7 @@ class BookDetailsModal {
 }
 
 class BookDetail {
+
   String bookId;
   String carId;
   String carTitle;
@@ -139,10 +140,10 @@ class BookDetail {
     ownerContact: json["owner_contact"],
     ownerImg: json["owner_img"] ?? '',
     bookType: json["book_type"],
-    wallAmt: json["wall_amt"],
+    wallAmt: json["wall_amt"].toString(),
     totalDayOrHr: json["total_day_or_hr"],
-    taxAmt: json["tax_amt"],
-    taxPer: json["tax_per"],
+    taxAmt: json["tax_amt"].toString(),
+    taxPer: json["tax_per"].toString(),
     engineHp: json["engine_hp"],
     fuelType: json["fuel_type"],
     totalSeat: json["total_seat"],

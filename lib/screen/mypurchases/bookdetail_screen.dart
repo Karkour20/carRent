@@ -30,7 +30,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 class BookdetailScreen extends StatefulWidget {
   final String id;
-  const BookdetailScreen({super.key, required this.id});
+  final BookDetailsModal bookDetailsModal;
+  const BookdetailScreen({super.key, required this.id, required this.bookDetailsModal});
 
   @override
   State<BookdetailScreen> createState() => _BookdetailScreenState();
@@ -52,12 +53,12 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
       "book_id": bId,
     };
     try{
-      var response = await http.post(Uri.parse(Config.baseUrl+Config.bookDetail), body: jsonEncode(body), headers: {
-        'Content-Type': 'application/json',
-      });
-      if(response.statusCode == 200){
+      // var response = await http.post(Uri.parse(Config.baseUrl+Config.bookDetail), body: jsonEncode(body), headers: {
+      //   'Content-Type': 'application/json',
+      // });
+     // if(response.statusCode == 200){
         setState(() {
-          bookDetails = bookDetailsModalFromJson(response.body);
+         // bookDetails = bookDetailsModalFromJson(response.body);
           img = bookDetails!.bookDetails[inDex].carImg.toString().split("\$;");
           isLoading = false;
         });
@@ -69,7 +70,7 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
           listOfUrls1.add("${Config.imgUrl}${bookDetails!.bookDetails[0].interPhoto[i]}");
           setState(() {});
         }
-      } else {}
+     // } else {}
     }catch(e){}
   }
   Future verifyOtp(bid, uId, status, otp) async {
@@ -99,6 +100,7 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
   var currencies;
   @override
   void initState() {
+    bookDetails=widget.bookDetailsModal;
     addCustomIcon();
     validate();
     super.initState();
@@ -112,11 +114,13 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
   }
 
   Future validate() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    Id = jsonDecode(sharedPreferences.getString('UserLogin')!);
-    currencies = jsonDecode(sharedPreferences.getString('bannerData')!);
-    sharedPreferences.setString('id', widget.id);
-    bDetail(Id['id'], widget.id);
+    // SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    // Id = jsonDecode(sharedPreferences.getString('UserLogin')!);
+    currencies = {
+      'currency':"JOD"
+    };
+    //sharedPreferences.setString('id', widget.id);
+    bDetail("Id['id']"," widget.id");
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
@@ -1253,7 +1257,7 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Pick-up'.tr, maxLines: 1, style: TextStyle(fontFamily: FontFamily.europaWoff, color: notifire.getgreycolor, fontSize: 15, overflow: TextOverflow.ellipsis)),
-                              Text('${bookDetails!.bookDetails[index].pickupDate.toString().split(" ").first} - ${DateFormat('hh:mm a').format(DateTime.parse('${bookDetails!.bookDetails[index].pickupDate.toString().split(" ").first} ${bookDetails!.bookDetails[index].pickupTime}'))}', maxLines: 1, style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 13, overflow: TextOverflow.ellipsis)),
+                              Text('${bookDetails!.bookDetails[index].pickupDate.toString().split(" ").first} -${bookDetails!.bookDetails[index].pickupTime}', maxLines: 1, style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 13, overflow: TextOverflow.ellipsis)),
                             ],
                           ),
                           Spacer(),
@@ -1261,7 +1265,7 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Drop-off'.tr, style: TextStyle(fontFamily: FontFamily.europaWoff, color: notifire.getgreycolor, fontSize: 15, overflow: TextOverflow.ellipsis)),
-                              Text('${bookDetails!.bookDetails[index].returnDate.toString().split(" ").first} - ${DateFormat('hh:mm a').format(DateTime.parse('${bookDetails!.bookDetails[index].returnDate.toString().split(" ").first} ${bookDetails!.bookDetails[index].returnTime}'))}', style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 13, overflow: TextOverflow.ellipsis)),
+                              Text('${bookDetails!.bookDetails[index].returnDate.toString().split(" ").first} - ${bookDetails!.bookDetails[index].returnTime}', style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 13, overflow: TextOverflow.ellipsis)),
                             ],
                           ),
                           SizedBox(width: 13),

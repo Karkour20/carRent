@@ -9,7 +9,7 @@ MyBookingHistoryModal myBookingHistoryModalFromJson(String str) => MyBookingHist
 String myBookingHistoryModalToJson(MyBookingHistoryModal data) => json.encode(data.toJson());
 
 class MyBookingHistoryModal {
-  List<BookHistory> bookHistory;
+  List<MyBookHistory> bookHistory;
   String responseCode;
   String result;
   String responseMsg;
@@ -22,7 +22,7 @@ class MyBookingHistoryModal {
   });
 
   factory MyBookingHistoryModal.fromJson(Map<String, dynamic> json) => MyBookingHistoryModal(
-    bookHistory: List<BookHistory>.from(json["book_history"].map((x) => BookHistory.fromJson(x))),
+    bookHistory: List<MyBookHistory>.from(json["book_history"].map((x) => MyBookHistory.fromJson(x))),
     responseCode: json["ResponseCode"],
     result: json["Result"],
     responseMsg: json["ResponseMsg"],
@@ -36,7 +36,7 @@ class MyBookingHistoryModal {
   };
 }
 
-class BookHistory {
+class MyBookHistory {
   String bookId;
   String carTitle;
   String carNumber;
@@ -58,7 +58,7 @@ class BookHistory {
   DateTime returnDate;
   String returnTime;
 
-  BookHistory({
+  MyBookHistory({
     required this.bookId,
     required this.carTitle,
     required this.carNumber,
@@ -81,7 +81,7 @@ class BookHistory {
     required this.returnTime,
   });
 
-  factory BookHistory.fromJson(Map<String, dynamic> json) => BookHistory(
+  factory MyBookHistory.fromJson(Map<String, dynamic> json) => MyBookHistory(
     bookId: json["book_id"],
     carTitle: json["car_title"],
     carNumber: json["car_number"],

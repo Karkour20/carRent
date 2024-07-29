@@ -1,5 +1,6 @@
 // ignore_for_file: empty_catches, prefer_typing_uninitialized_variables
 import 'dart:convert';
+import 'package:carlink/model/bookdetails_modal.dart';
 import 'package:carlink/model/bookhistory_modal.dart';
 import 'package:carlink/screen/mypurchases/bookdetail_screen.dart';
 import 'package:carlink/utils/App_content.dart';
@@ -171,7 +172,7 @@ var data=await FirebaseFirestore.instance.collection("Books").where("uid",isEqua
                         itemBuilder: (context, index2) {
                           return InkWell(
                             onTap: () {
-                              Get.to(BookdetailScreen(id: bookHistory!.bookHistory[index2].bookId));
+                              Get.to(BookdetailScreen(id: bookHistory!.bookHistory[index2].bookId, bookDetailsModal: BookDetailsModal(bookDetails:[ bookHistory!.bookHistory[index2]], responseCode: 'responseCode', result: 'result', responseMsg: 'responseMsg'),));
                             },
                             child: Container(
                               width: Get.size.width,
@@ -302,7 +303,7 @@ var data=await FirebaseFirestore.instance.collection("Books").where("uid",isEqua
                         itemBuilder: (context, index2) {
                           return InkWell(
                             onTap: () {
-                              Get.to(BookdetailScreen(id: bookHistory1!.bookHistory[index2].bookId));
+                              Get.to(BookdetailScreen(id: bookHistory1!.bookHistory[index2].bookId,bookDetailsModal: BookDetailsModal(bookDetails:[ bookHistory1!.bookHistory[index2]], responseCode: 'responseCode', result: 'result', responseMsg: 'responseMsg')));
                             },
                             child: Container(
                               // height: 250,
