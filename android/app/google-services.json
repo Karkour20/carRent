@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1080816862730",
+    "project_id": "serves-ltxnrk",
+    "storage_bucket": "serves-ltxnrk.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1080816862730:android:04d0b14651a62dc93601f3",
+        "android_client_info": {
+          "package_name": "com.cargurus.userapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuzIuL7NMdoSeqwh_gHG8TtM6Lm9kA9FY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1080816862730:android:909d8f49150031ea3601f3",
+        "android_client_info": {
+          "package_name": "com.mycompany.homeservicesproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuzIuL7NMdoSeqwh_gHG8TtM6Lm9kA9FY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
