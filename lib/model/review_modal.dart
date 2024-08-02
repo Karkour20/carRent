@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 ReviewModal reviewModalFromJson(String str) => ReviewModal.fromJson(json.decode(str));
 
 String reviewModalToJson(ReviewModal data) => json.encode(data.toJson());
@@ -58,6 +60,13 @@ class Reviewdatum {
     reviewDate: DateTime.parse(json["review_date"]),
     userDesc: json["user_desc"],
   );
+  factory Reviewdatum.fromFirebase(Map<String, dynamic> json) => Reviewdatum(
+    userImg: json["user_img"],
+    userTitle: json["user_title"],
+    userRate: json["user_rate"].toString(),
+    reviewDate: convertTimestampToDateTime(json["review_date"]),
+    userDesc: json["user_desc"],
+  );
 
   Map<String, dynamic> toJson() => {
     "user_img": userImg,
@@ -66,4 +75,7 @@ class Reviewdatum {
     "review_date": "${reviewDate.year.toString().padLeft(4, '0')}-${reviewDate.month.toString().padLeft(2, '0')}-${reviewDate.day.toString().padLeft(2, '0')}",
     "user_desc": userDesc,
   };
+}
+DateTime convertTimestampToDateTime(Timestamp timestamp) {
+  return timestamp.toDate();
 }

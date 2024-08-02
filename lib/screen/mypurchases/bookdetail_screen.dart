@@ -3,11 +3,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:carlink/controller/favorite_controller.dart';
+import 'package:carlink/model/carinfo_modal.dart';
 import 'package:carlink/screen/detailcar/cardetails_screen.dart';
 import 'package:carlink/utils/App_content.dart';
 import 'package:carlink/utils/Colors.dart';
 import 'package:carlink/utils/common.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -22,6 +26,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../model/bookdetails_modal.dart';
+import '../../model/homeData_modal.dart';
 import '../../utils/Dark_lightmode.dart';
 import '../../utils/config.dart';
 import '../../utils/fontfameli_model.dart';
@@ -42,23 +47,30 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
   late GoogleMapController mapController;
 
   BookDetailsModal? bookDetails;
-  bool isLoading = true;
+  bool isLoading = false;
   List img =[];
   int inDex=0;
 
   // Book Detail Api
   Future bDetail(uid, bId) async {
+    setState(() {
+      isLoading = true;
+    });
     Map body = {
       "uid": uid,
       "book_id": bId,
     };
     try{
-      // var response = await http.post(Uri.parse(Config.baseUrl+Config.bookDetail), body: jsonEncode(body), headers: {
-      //   'Content-Type': 'application/json',
-      // });
+print(body);
+      var data=await FirebaseFirestore.instance.collection("Books").doc( bId)
+      //.where("status",isEqualTo: status)
+          .get();
      // if(response.statusCode == 200){
         setState(() {
-         // bookDetails = bookDetailsModalFromJson(response.body);
+          bookDetails = BookDetailsModal(
+              bookDetails: [
+                BookDetail.fromJson(data.data()!)
+              ], responseCode: 'responseCode', result: 'result', responseMsg: 'responseMsg');
           img = bookDetails!.bookDetails[inDex].carImg.toString().split("\$;");
           isLoading = false;
         });
@@ -82,22 +94,39 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
       "otp": otp,
     };
 
-
-    try{
-      var response = await http.post(Uri.parse('${Config.baseUrl}${Config.otpVerify}'), body: jsonEncode(body), headers: {
-        'Content-Type': 'application/json',
-      });
-
-      if(response.statusCode == 200){
-        var data = jsonDecode(response.body);
-        return data;
-      }else {
-      }
-    }catch(e){
-    }
+if(otp== (status=="Pickup"?bookDetails!.bookDetails[0].pickOtp:bookDetails!.bookDetails[0].dropOtp)){
+  return {
+    "ResponseCode": "200",
+    "Result": "result",
+    "ResponseMsg": "otp verified",
+  };
+}else{
+  return {
+    "ResponseCode": "400",
+    "Result": "result",
+    "ResponseMsg": "otp not verified",
+  };
+}
+    // try{
+    //   var response = await http.post(Uri.parse('${Config.baseUrl}${Config.otpVerify}'), body: jsonEncode(body), headers: {
+    //     'Content-Type': 'application/json',
+    //   });
+    //
+    //   if(response.statusCode == 200){
+    //     var data = jsonDecode(response.body);
+    //     return data;
+    //   }else {
+    //   }
+    // }catch(e){
+    // }
   }
-  var Id;
-  var currencies;
+  var Id={
+    "id": "324556"
+  };
+
+  var  currencies = {
+    'currency':"JOD"
+  };
   @override
   void initState() {
     bookDetails=widget.bookDetailsModal;
@@ -116,11 +145,9 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
   Future validate() async {
     // SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     // Id = jsonDecode(sharedPreferences.getString('UserLogin')!);
-    currencies = {
-      'currency':"JOD"
-    };
+
     //sharedPreferences.setString('id', widget.id);
-    bDetail("Id['id']"," widget.id");
+    bDetail("Id['id']",widget.id);
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
@@ -135,6 +162,7 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
     BitmapDescriptor.fromAssetImage(const ImageConfiguration(), Appcontent.mapPin).then((icon) {
       setState(() {
         markerIcon = icon;
+        markerIcon = icon;
       });
     },
     );
@@ -144,65 +172,66 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
     var headers = {
       'Cookie': 'PHPSESSID=du090smokg8284t6m11p7h38cl'
     };
-    var request = http.MultipartRequest('POST', Uri.parse(Config.baseUrl+Config.pickUp));
-    request.fields.addAll({
-      'uid': uid,
-      'book_id': book,
-      'size': size,
-      'sizes': sizes,
+    List<String> exterPhoto=await uploadImages(image, "exterPhoto");
+    List<String> interPhoto=await uploadImages(image1, "interPhoto");
+    var data=await FirebaseFirestore.instance.collection("Books").doc( book)
+    //.where("status",isEqualTo: status)
+        .update({
+      "book_status": "Pick_up",
+      //"cancle_reason": reason,
+      "exter_photo": exterPhoto,
+      "inter_photo": interPhoto,
     });
-    for(int a=0; a<image.length; a++){
-      request.files.add(await http.MultipartFile.fromPath('carint$a', image[a]));
-    }
-
-    for(int b=0; b<image1.length; b++){
-      request.files.add(await http.MultipartFile.fromPath('carext$b', image1[b]));
-    }
-
-    request.headers.addAll(headers);
-    http.StreamedResponse response = await request.send();
-
-    if (response.statusCode == 200) {
-      return jsonDecode(await response.stream.bytesToString());
-    }
-    else {
-      return jsonDecode(await response.stream.bytesToString());
-    }
   }
 
   TextEditingController commentController = TextEditingController();
   TextEditingController reason = TextEditingController();
   var rated;
+  User user = FirebaseAuth.instance.currentUser!;
   Future rate(uid, book, tRate, rText) async {
     Map body = {
-      "uid": uid,
-      "book_id": book,
-      "total_rate": tRate,
-      "rate_text": rText,
+      "user_img": user.photoURL,
+      "user_title": user.displayName!.split('-')[0],
+      "user_rate": tRate,
+      "review_date": DateTime.now(),
+      "user_desc": rText,
     };
+    var carRef = FirebaseFirestore.instance.collection('featuredcars').doc(carId);
+
     try{
-      var response = await http.post(Uri.parse(Config.baseUrl+Config.rate), body: jsonEncode(body), headers: {
-        'Content-Type': 'application/json',
+
+      //reviewdata
+      carRef.update({
+        "reviewdata": FieldValue.arrayUnion([body]),
+
       });
-      if(response.statusCode == 200){
-        var data = jsonDecode(response.body);
-        return data;
-      } else {}
+      var data=await FirebaseFirestore.instance.collection("Books").doc( book)
+      //.where("status",isEqualTo: status)
+          .update({
+   "is_rate":"1"
+      });
+      // var response = await http.post(Uri.parse(Config.baseUrl+Config.rate), body: jsonEncode(body), headers: {
+      //   'Content-Type': 'application/json',
+      // });
+      // if(response.statusCode == 200){
+      //   var data = jsonDecode(response.body);
+      //   return data;
+      // } else {}
     }catch(e){}
   }
   Future drop(uid, book) async {
+    //Completed
     Map body = {
       "uid": uid,
       "book_id": book,
     };
     try{
-      var response = await http.post(Uri.parse(Config.baseUrl+Config.drop), body: jsonEncode(body), headers: {
-        'Content-Type': 'application/json',
+      var data=await FirebaseFirestore.instance.collection("Books").doc( book)
+      //.where("status",isEqualTo: status)
+          .update({
+        "book_status": "Completed",
+
       });
-      if(response.statusCode == 200){
-        var data = jsonDecode(response.body);
-        return data;
-      } else {}
     }catch(e){}
   }
 
@@ -213,13 +242,16 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
       "cancle_reason": reason,
     };
     try{
-      var response = await http.post(Uri.parse(Config.baseUrl+Config.cancel), body: jsonEncode(body), headers: {
-        'Content-Type': 'application/json',
+      var data=await FirebaseFirestore.instance.collection("Books").doc( book)
+      //.where("status",isEqualTo: status)
+          .update({
+        "book_status": "Cancelled",
+        "cancle_reason": reason,
       });
-      if(response.statusCode == 200){
-        var data = jsonDecode(response.body);
-        return data;
-      } else {}
+      // if(response.statusCode == 200){
+      //   var data = jsonDecode(response.body);
+      //   return data;
+      // } else {}
     }catch(e){}
   }
 
@@ -229,7 +261,7 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
   ImagePicker imagePicker1 =ImagePicker();
 
   Future picker() async {
-    XFile? file = await imagePicker.pickImage(source: ImageSource.camera);
+    XFile? file = await imagePicker.pickImage(source: ImageSource.camera, imageQuality: 50,);
     if(file!=null){
       setState(() {
         image.add(file.path);
@@ -341,14 +373,14 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
                                       ),
                                       onPressed: () {
                                         if(reason.text.isNotEmpty){
-                                          cancel(Id['id'], widget.id, reason.text).then((value) {
-                                            bDetail(Id['id'], widget.id);
-                                            if(value['ResponseCode'] == "200"){
+                                          cancel("Id['id']", widget.id, reason.text).then((value) {
+                                            bDetail("Id['id']", widget.id);
+                                          //  if(value['ResponseCode'] == "200"){
                                               Get.back();
-                                              Fluttertoast.showToast(msg: value['ResponseMsg']);
-                                            }else{
-                                              Fluttertoast.showToast(msg: value['ResponseMsg']);
-                                            }
+                                            //   Fluttertoast.showToast(msg: value['ResponseMsg']);
+                                            // }else{
+                                            //   Fluttertoast.showToast(msg: value['ResponseMsg']);
+                                            // }
                                           });
                                         } else{
                                           Fluttertoast.showToast(msg: 'Please some your text!!');
@@ -377,8 +409,23 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
                       side: BorderSide(color: onbordingBlue),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     ),
-                    onPressed: () {
-                      Get.to(CarDetailsScreen(id: carId, currency: currencies['currency']));
+                    onPressed: () async{
+                      setState(() {
+                        isLoading=true;
+                      });
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    // Get the collection reference
+    CollectionReference carlistsRef = firestore.collection('featuredcars');
+
+    DocumentSnapshot<Object?> querySnapshot = await carlistsRef.doc(carId).get();
+
+    // Extract data from the query snapshot
+                      FeatureCar featureCarList = FeatureCar.fromJson(querySnapshot.data() as Map<String, dynamic>);
+                      setState(() {
+                        isLoading=false;
+                      });
+                      Get.to(CarDetailsScreen(id: carId, currency: currencies['currency']!,carInfo: CarInfo(carinfo: featureCarList, galleryImages: featureCarList.carImg, responseCode: 'responseCode', result: 'result', responseMsg: 'responseMsg'),));
                     },
                     child: Text('Book again', style: TextStyle(fontSize: 15, color: onbordingBlue, fontFamily: FontFamily.europaBold)),
                   ),
@@ -392,8 +439,23 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
                         side: BorderSide(color: onbordingBlue),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                       ),
-                      onPressed: () {
-                        Get.to(CarDetailsScreen(id: carId, currency: currencies['currency']));
+                      onPressed: () async{
+                        setState(() {
+                          isLoading=true;
+                        });
+                        FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+                        // Get the collection reference
+                        CollectionReference carlistsRef = firestore.collection('featuredcars');
+
+                        DocumentSnapshot<Object?> querySnapshot = await carlistsRef.doc(carId).get();
+
+                        // Extract data from the query snapshot
+                        FeatureCar featureCarList = FeatureCar.fromJson(querySnapshot.data() as Map<String, dynamic>);
+                        setState(() {
+                          isLoading=false;
+                        });
+                        Get.to(CarDetailsScreen(id: carId, currency: currencies['currency']!,carInfo: CarInfo(carinfo: featureCarList, galleryImages: featureCarList.carImg, responseCode: 'responseCode', result: 'result', responseMsg: 'responseMsg'),));
                       },
                       child: Text('Book again'.tr, style: TextStyle(fontSize: 15, color: onbordingBlue, fontFamily: FontFamily.europaBold)),
                     ),
@@ -448,7 +510,7 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                                     ),
                                     onPressed: () {
-                                      verifyOtp(bookDetails!.bookDetails[0].bookId, Id['id'], 'Pickup', code).then((value) {
+                                      verifyOtp(bookDetails!.bookDetails[0].bookId, 'Id', 'Pickup', code).then((value) {
                                         if(value["ResponseCode"] == "200"){
                                           Get.back();
                                           showModalBottomSheet(
@@ -473,22 +535,22 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
                                                               setState(() {
                                                                 loading=true;
                                                               });
-                                                              pickup(Id['id'], widget.id, image.length.toString(), image1.length.toString()).then((value) {
-                                                                bDetail(Id['id'], widget.id);
-                                                                rate(Id['id'], widget.id, rated,commentController.text);
-                                                                if(value["ResponseCode"] == "200"){
+                                                              pickup('', widget.id, image.length.toString(), image1.length.toString()).then((value) {
+                                                                bDetail('', widget.id);
+                                                              //  rate(Id['id'], widget.id, rated,commentController.text);
+                                                               // if(value["ResponseCode"] == "200"){
                                                                   setState(() {
                                                                     loading=false;
                                                                   });
                                                                   Get.back();
-                                                                  Fluttertoast.showToast(msg: value['ResponseMsg']);
-                                                                } else{
-                                                                  setState(() {
-                                                                    loading=false;
-                                                                  });
-                                                                  Fluttertoast.showToast(msg: value['ResponseMsg']);
-                                                                }
-                                                              });
+                                                                  Fluttertoast.showToast(msg: "pickup confirmed".tr);
+                                                               // } else{
+                                                              //     setState(() {
+                                                              //       loading=false;
+                                                              //     });
+                                                              //     Fluttertoast.showToast(msg: value['ResponseMsg']);
+                                                              //   }
+                                                               });
                                                             } else{
                                                               Fluttertoast.showToast(msg: 'Please Upload your image!!');
                                                             }
@@ -732,7 +794,7 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                                   ),
                                   onPressed: () {
-                                    verifyOtp(bookDetails!.bookDetails[0].bookId, Id['id'], 'Drop', code).then((value) {
+                                    verifyOtp(bookDetails!.bookDetails[0].bookId, '', 'Drop', code).then((value) {
                                       if(value["ResponseCode"] == "200"){
                                         Get.back();
                                         showModalBottomSheet(
@@ -816,16 +878,16 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
                                                             backgroundColor: onbordingBlue,
                                                           ),
                                                           onPressed: () {
-                                                            drop(Id['id'], widget.id).then((value) {
-                                                              bDetail(Id['id'], widget.id);
-                                                              rate(Id['id'], widget.id, rated,commentController.text);
-                                                              if(value["ResponseCode"] == "200"){
+                                                            drop('', widget.id).then((value) {
+                                                              bDetail('', widget.id);
+                                                              //rate(Id['id'], widget.id, rated,commentController.text);
+                                                             // if(value["ResponseCode"] == "200"){
                                                                 Get.back();
                                                                 setState(() {});
-                                                                Fluttertoast.showToast(msg: value['ResponseMsg']);
-                                                              } else{
-                                                                Fluttertoast.showToast(msg: value['ResponseMsg']);
-                                                              }
+                                                                Fluttertoast.showToast(msg: 'drop success'.tr);
+                                                              // } else{
+                                                              //   Fluttertoast.showToast(msg: value['ResponseMsg']);
+                                                              // }
                                                             });
                                                           },
                                                           child: Text('Confirm Drop-off'.tr, style: TextStyle(fontFamily: FontFamily.europaBold, color: Colors.white, fontSize: 15)),
@@ -926,13 +988,13 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
                                       ),
                                       onPressed: () {
                                         if(commentController.text.isNotEmpty){
-                                          rate(Id['id'], widget.id, rated, commentController.text).then((value) {
-                                            if(value["ResponseCode"] == "200"){
-                                              bDetail(Id['id'], widget.id);
-                                              rate(Id['id'], widget.id, rated,commentController.text);
+                                          rate('', widget.id, rated, commentController.text).then((value) {
+                                            if(true){
+                                              bDetail('', widget.id);
+                                              //rate(Id['id'], widget.id, rated,commentController.text);
                                               Get.back();
                                               setState(() {});
-                                              Fluttertoast.showToast(msg: value['ResponseMsg']);
+                                              Fluttertoast.showToast(msg: 'rate success'.tr);
                                             } else{
                                               Fluttertoast.showToast(msg: value['ResponseMsg']);
                                             }
@@ -1427,4 +1489,20 @@ class _BookdetailScreenState extends State<BookdetailScreen> {
       ],
     );
   }
+}
+Future<List<String>> uploadImages(List<String> imagePaths,String path) async {
+  FirebaseStorage storage = FirebaseStorage.instance;
+  List<String> downloadUrls = [];
+
+  for (String path in imagePaths) {
+    File file = File(path);
+    try {
+      TaskSnapshot snapshot = await storage.ref('$path/${DateTime.now().toIso8601String()}.jpg').putFile(file);
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      downloadUrls.add(downloadUrl);
+    } catch (e) {
+      print('Error uploading image: $e');
+    }
+  }
+  return downloadUrls;
 }

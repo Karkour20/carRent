@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:carlink/model/mybookhistory_modal.dart';
 import 'package:carlink/screen/addcar_screens/mybookingdetail_screen.dart';
 import 'package:carlink/screen/mypurchases/mypurchases_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:carlink/utils/Dark_lightmode.dart';
@@ -44,17 +46,21 @@ class _MyBookScreenState extends State<MyBookScreen> {
       "uid": uid,
       "status": status,
     };
-    try{
-      var response = await http.post(Uri.parse(Config.baseUrl+Config.myBookHistory), body: jsonEncode(body), headers: {
-        'Content-Type': 'application/json',
+    var data=await FirebaseFirestore.instance.collection("Books")
+    //.where("status",isEqualTo: status)
+        .get();
+    //if(response.statusCode == 200){
+    setState(() {
+      myBookingHistoryModal = myBookingHistoryModalFromJson({
+        "book_history": data.docs.map((e) => e.data()).toList(),
+        "ResponseCode": "responseCode",
+        "Result": "result",
+        "ResponseMsg": "responseMsg",
       });
-      if(response.statusCode == 200){
-        setState(() {
-          myBookingHistoryModal = myBookingHistoryModalFromJson(response.body);
-          isLoading = false;
-        });
-      } else {}
-    }catch(e){}
+      isLoading = false;
+    });
+    // } else {}
+    // }catch(e){}
   }
 
   // History
@@ -64,27 +70,31 @@ class _MyBookScreenState extends State<MyBookScreen> {
       "uid": uid,
       "status": status,
     };
-    try{
-      var response = await http.post(Uri.parse(Config.baseUrl+Config.myBookHistory), body: jsonEncode(body), headers: {
-        'Content-Type': 'application/json',
+    var data=await FirebaseFirestore.instance.collection("Books")
+    //.where("status",isEqualTo: status)
+        .get();
+    //if(response.statusCode == 200){
+    setState(() {
+      myBookingHistoryModal1 = myBookingHistoryModalFromJson({
+        "book_history": data.docs.map((e) => e.data()).toList(),
+        "ResponseCode": "responseCode",
+        "Result": "result",
+        "ResponseMsg": "responseMsg",
       });
-      if(response.statusCode == 200){
-        setState(() {
-          myBookingHistoryModal1 = myBookingHistoryModalFromJson(response.body);
-          isLoading = false;
-        });
-      } else {}
-    }catch(e){}
+      isLoading = false;
+    });
   }
 
   var id;
-  var currencies;
+  var currencies={
+    "currency": "JOD",
+  };
   Future getvalidate() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    id = widget.uid == "0" ? "0" :  jsonDecode(sharedPreferences.getString('UserLogin')!);
-    currencies = widget.uid == "0" ? "0" :  jsonDecode(sharedPreferences.getString('bannerData')!);
-    bHistory(widget.uid == "0" ? "0" : id['id'], 'Booked');
-    bHistory1(widget.uid == "0" ? "0" : id['id'], 'Past');
+   // id = widget.uid == "0" ? "0" :  jsonDecode(sharedPreferences.getString('UserLogin')!);
+   // currencies = widget.uid == "0" ? "0" :  jsonDecode(sharedPreferences.getString('bannerData')!);
+    bHistory('', 'Booked');
+    bHistory1('', 'Past');
   }
   @override
   Widget build(BuildContext context) {
@@ -139,7 +149,7 @@ class _MyBookScreenState extends State<MyBookScreen> {
                       itemBuilder: (context, index2) {
                         return InkWell(
                           onTap: () {
-                            Get.to(MyBookingDetailScreen(bookId: myBookingHistoryModal!.bookHistory[index2].bookId, uid: widget.uid == "0" ? "0" : id['id'],  dollarSign: widget.dollarSign));
+                            Get.to(MyBookingDetailScreen(bookId: myBookingHistoryModal!.bookHistory[index2].bookId, uid: "no id",  dollarSign: widget.dollarSign));
                           },
                           child: Container(
                             // height: 250,
@@ -247,7 +257,7 @@ class _MyBookScreenState extends State<MyBookScreen> {
                                         children: [
                                           Image.asset(Appcontent.calender, height: 20,width: 20,color: notifire.getwhiteblackcolor),
                                           const SizedBox(width: 8),
-                                          Expanded(child: Text("${myBookingHistoryModal!.bookHistory[index2].pickupDate.toString().split(" ").first} - ${DateFormat('hh:mm a').format(DateTime.parse('${myBookingHistoryModal!.bookHistory[index2].pickupDate.toString().split(" ").first} ${myBookingHistoryModal!.bookHistory[index2].pickupTime}'))} To ${myBookingHistoryModal!.bookHistory[index2].returnDate.toString().split(" ").first} - ${DateFormat('hh:mm a').format(DateTime.parse('${myBookingHistoryModal!.bookHistory[index2].returnDate.toString().split(" ").first} ${myBookingHistoryModal!.bookHistory[index2].returnTime}'))}", style: TextStyle(fontSize: 13,fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor),overflow: TextOverflow.ellipsis)),
+                                          Expanded(child: Text("${myBookingHistoryModal!.bookHistory[index2].pickupDate.toString().split(" ").first} - ${myBookingHistoryModal!.bookHistory[index2].pickupTime} To ${myBookingHistoryModal!.bookHistory[index2].returnDate.toString().split(" ").first} - ${myBookingHistoryModal!.bookHistory[index2].returnTime}", style: TextStyle(fontSize: 13,fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor),overflow: TextOverflow.ellipsis)),
                                           const SizedBox(width: 5),
                                         ],
                                       ),
@@ -377,7 +387,7 @@ class _MyBookScreenState extends State<MyBookScreen> {
                                         children: [
                                           Image.asset(Appcontent.calender, height: 20,width: 20,color: notifire.getwhiteblackcolor),
                                           const SizedBox(width: 8),
-                                          Expanded(child: Text("${myBookingHistoryModal1!.bookHistory[index2].pickupDate.toString().split(" ").first} - ${DateFormat('hh:mm a').format(DateTime.parse('${myBookingHistoryModal1!.bookHistory[index2].pickupDate.toString().split(" ").first} ${myBookingHistoryModal1!.bookHistory[index2].pickupTime}'))} To ${myBookingHistoryModal1!.bookHistory[index2].returnDate.toString().split(" ").first} - ${DateFormat('hh:mm a').format(DateTime.parse('${myBookingHistoryModal1!.bookHistory[index2].returnDate.toString().split(" ").first} ${myBookingHistoryModal1!.bookHistory[index2].returnTime}'))}", style: TextStyle(fontSize: 13,fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor),overflow: TextOverflow.ellipsis)),
+                                          Expanded(child: Text("${myBookingHistoryModal1!.bookHistory[index2].pickupDate.toString().split(" ").first} - ${myBookingHistoryModal1!.bookHistory[index2].pickupTime}' To ${myBookingHistoryModal1!.bookHistory[index2].returnDate.toString().split(" ").first} -${myBookingHistoryModal1!.bookHistory[index2].returnTime}", style: TextStyle(fontSize: 13,fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor),overflow: TextOverflow.ellipsis)),
                                           const SizedBox(width: 5),
                                         ],
                                       ),

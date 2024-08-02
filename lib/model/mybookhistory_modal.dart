@@ -4,12 +4,14 @@
 
 import 'dart:convert';
 
-MyBookingHistoryModal myBookingHistoryModalFromJson(String str) => MyBookingHistoryModal.fromJson(json.decode(str));
+import 'bookdetails_modal.dart';
+
+MyBookingHistoryModal myBookingHistoryModalFromJson( Map<String, dynamic> str) => MyBookingHistoryModal.fromJson(str);
 
 String myBookingHistoryModalToJson(MyBookingHistoryModal data) => json.encode(data.toJson());
 
 class MyBookingHistoryModal {
-  List<MyBookHistory> bookHistory;
+  List<BookDetail> bookHistory;
   String responseCode;
   String result;
   String responseMsg;
@@ -22,7 +24,7 @@ class MyBookingHistoryModal {
   });
 
   factory MyBookingHistoryModal.fromJson(Map<String, dynamic> json) => MyBookingHistoryModal(
-    bookHistory: List<MyBookHistory>.from(json["book_history"].map((x) => MyBookHistory.fromJson(x))),
+    bookHistory: List<BookDetail>.from(json["book_history"].map((x) => BookDetail.fromJson(x))),
     responseCode: json["ResponseCode"],
     result: json["Result"],
     responseMsg: json["ResponseMsg"],

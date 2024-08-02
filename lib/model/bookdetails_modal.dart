@@ -76,6 +76,11 @@ class BookDetail {
   String bookStatus;
   List<dynamic> exterPhoto;
   List<dynamic> interPhoto;
+  String customerName;
+  String customerContact;
+  String customerImg;
+  String pickOtp;
+  String dropOtp;
 
   BookDetail({
     required this.bookId,
@@ -116,6 +121,11 @@ class BookDetail {
     required this.bookStatus,
     required this.exterPhoto,
     required this.interPhoto,
+    required this.customerName,
+    required this.customerContact,
+    required this.customerImg,
+    required this.pickOtp,
+    required this.dropOtp,
   });
 
   factory BookDetail.fromJson(Map<String, dynamic> json) => BookDetail(
@@ -157,6 +167,12 @@ class BookDetail {
     bookStatus: json["book_status"],
     exterPhoto: List<dynamic>.from(json["exter_photo"].map((x) => x)),
     interPhoto: List<dynamic>.from(json["inter_photo"].map((x) => x)),
+    customerName: json["customer_name"],
+    customerContact: json["customer_contact"],
+    customerImg: json["customer_img"],
+    pickOtp: json["pick_otp"].toString(),
+    dropOtp: json["drop_otp"].toString(),
+
   );
 
   Map<String, dynamic> toJson() => {
@@ -198,5 +214,10 @@ class BookDetail {
     "book_status": bookStatus,
     "exter_photo": List<dynamic>.from(exterPhoto.map((x) => x)),
     "inter_photo": List<dynamic>.from(interPhoto.map((x) => x)),
+    "customer_name": customerName,
+    "customer_contact": customerContact,
+    "customer_img": customerImg,
+    "pick_otp": pickOtp,
+    "drop_otp": dropOtp,
   };
 }

@@ -6,6 +6,7 @@ import 'package:carlink/model/explore_modal.dart';
 import 'package:carlink/utils/common_ematy.dart';
 import 'package:carlink/utils/common.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart'as http;
 import 'package:carlink/utils/config.dart';
@@ -15,6 +16,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../model/carinfo_modal.dart';
+import '../../model/homeData_modal.dart';
 import '../../utils/App_content.dart';
 import '../../utils/Colors.dart';
 import '../../utils/Dark_lightmode.dart';
@@ -53,12 +56,16 @@ class _ExploreScreenState extends State<ExploreScreen> {
       "cityid": cityId,
     };
     try{
-      var response = await http.post(Uri.parse(Config.baseUrl+Config.explore),body: jsonEncode(body), headers: {
-        'Content-Type': 'application/json',
-      });
-      if(response.statusCode == 200){
+      List<FeatureCar> featureCar =await featuredcars();
+      // var response = await http.post(Uri.parse(Config.baseUrl+Config.explore),body: jsonEncode(body), headers: {
+      //   'Content-Type': 'application/json',
+      // });
+      //if(response.statusCode == 200){
         setState(()  {
-          exploreModal =exploreModalFromJson(response.body);
+          exploreModal =ExploreModal(
+              responseCode: 'responseCode',
+              result: 'result',
+              responseMsg: 'responseMsg', featureCar: featureCar);
           loading=false;
         });
         final Uint8List markIcon = await getImages(Appcontent.mapPin, 90);
@@ -75,22 +82,41 @@ class _ExploreScreenState extends State<ExploreScreen> {
             // print(i.toString());
           },
         ));
-        setState(() {});
-        var data = jsonDecode(response.body.toString());
-        return data;
-      } else {}
+         setState(() {});
+        // var data = jsonDecode(response.body.toString());
+        // return data;
+      //} else {}
     } catch(e){}
   }
+  Future<List<FeatureCar>> featuredcars() async {
+    // Access the Firestore instance
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  var currencies;
+    // Get the collection reference
+    CollectionReference carlistsRef = firestore.collection('featuredcars');
+
+    QuerySnapshot querySnapshot = await carlistsRef.get();
+
+    // Extract data from the query snapshot
+    List<FeatureCar> featureCarList = querySnapshot.docs.map((doc) {
+      return  FeatureCar.fromJson(doc.data() as Map<String, dynamic>);
+
+    }).toList();
+
+    return featureCarList;
+  }
+
+  var currencies={
+    'currency':"JOD"
+  };
   Future getvalidate() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    var id = jsonDecode(sharedPreferences.getString('UserLogin')!);
-    var lat = jsonDecode(sharedPreferences.getString('lats')!);
-    var lng = jsonDecode(sharedPreferences.getString('longs')!);
-    var lId = jsonDecode(sharedPreferences.getString('lId')!);
-    currencies = jsonDecode(sharedPreferences.getString('bannerData')!);
-    explore(id['id'], lat, lng, lId);
+    // var id = jsonDecode(sharedPreferences.getString('UserLogin')!);
+    // var lat = jsonDecode(sharedPreferences.getString('lats')!);
+    // var lng = jsonDecode(sharedPreferences.getString('longs')!);
+    // var lId = jsonDecode(sharedPreferences.getString('lId')!);
+    // currencies = jsonDecode(sharedPreferences.getString('bannerData')!);
+    explore('', 'lat', 'lng', 'lId');
   }
 
   int Index=0;
@@ -156,7 +182,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           Index=index;
                           return InkWell(
                             onTap: () {
-                              Get.to(CarDetailsScreen(id: exploreModal!.featureCar[index].id, currency: currencies['currency']));
+                              Get.to(CarDetailsScreen(id: exploreModal!.featureCar[index].id, currency: currencies['currency']!,carInfo: CarInfo(carinfo:exploreModal!.featureCar[index] , galleryImages:exploreModal!.featureCar[index].carImg, responseCode: "responseCode", result: "result", responseMsg: "responseMsg")));
                             },
                             child: Container(
                               height: 160,
@@ -177,7 +203,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                         width: 140,
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(10),
-                                          image: DecorationImage(image: NetworkImage(Config.imgUrl+exploreModal!.featureCar[index].carImg.split("\$;").elementAt(0)),fit: BoxFit.cover),
+                                          image: DecorationImage(image: NetworkImage(Config.imgUrl+exploreModal!.featureCar[index].carImg.first),fit: BoxFit.cover),
                                         ),
                                       ),
                                       const SizedBox(width: 10),

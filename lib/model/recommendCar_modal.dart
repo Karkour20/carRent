@@ -6,6 +6,8 @@
 
 import 'dart:convert';
 
+import 'package:carlink/model/homeData_modal.dart';
+
 ViewPopularModal viewPopularModalFromJson(String str) => ViewPopularModal.fromJson(json.decode(str));
 
 String viewPopularModalToJson(ViewPopularModal data) => json.encode(data.toJson());
@@ -17,7 +19,7 @@ class ViewPopularModal {
   String isBlock;
   String tax;
   String currency;
-  List<RecommendCar> recommendCar;
+  List<FeatureCar> recommendCar;
 
   ViewPopularModal({
     required this.responseCode,
@@ -36,7 +38,7 @@ class ViewPopularModal {
     isBlock: json["is_block"],
     tax: json["tax"],
     currency: json["currency"],
-    recommendCar: List<RecommendCar>.from(json["Recommend_car"].map((x) => RecommendCar.fromJson(x))),
+    recommendCar: List<FeatureCar>.from(json["Recommend_car"].map((x) => FeatureCar.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {

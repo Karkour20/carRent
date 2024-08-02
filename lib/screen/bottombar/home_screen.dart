@@ -119,38 +119,39 @@ Future<List<FeatureCar>> featuredcars() async {
 
   // Extract data from the query snapshot
   List<FeatureCar> featureCarList = querySnapshot.docs.map((doc) {
-    return FeatureCar(
-      id: doc["id"],
-      carTitle: doc["carTitle"],
-      carImg: List<String>.from(doc["carImg"]),
-      carRating: doc["carRating"],
-      carNumber: doc["carNumber"],
-      totalSeat: doc["totalSeat"],
-      carGear: doc["carGear"],
-      carRentPrice: doc["carRentPrice"],
-      priceType: doc["priceType"],
-      engineHp: doc["engineHp"],
-      fuelType: doc["fuelType"],
-      carTypeTitle: doc["carTypeTitle"],
-      carDesc: doc["carDesc"],
-      pickLat: doc["pickLat"],
-      pickLng: doc["pickLng"],
-      pickAddress: doc["pickAddress"],
-      carFacility: doc["carFacility"],
-      isFavorite: doc["isFavorite"],
-      typeId:'',
-      cityId: '',
-      brandId: '',
-      minHrs: doc["minHrs"],
-      totalKm:doc["totalKm"],
-      facilityImg: '',
-      carTypeImg: '',
-      carBrandTitle: '',
-      carBrandImg: '',
-      carRentPriceDriver: '',
-      carAc:doc['carAc'],
-      bookeddate: List<Bookeddate>.from(doc["bookeddate"].map((x) => Bookeddate.fromFirebase(x))) ,
-    );
+    return  FeatureCar.fromJson(doc.data() as Map<String, dynamic>);
+    //   FeatureCar(
+    //   id: doc["id"],
+    //   carTitle: doc["carTitle"],
+    //   carImg: List<String>.from(doc["carImg"]),
+    //   carRating: doc["carRating"],
+    //   carNumber: doc["carNumber"],
+    //   totalSeat: doc["totalSeat"],
+    //   carGear: doc["carGear"],
+    //   carRentPrice: doc["carRentPrice"],
+    //   priceType: doc["priceType"],
+    //   engineHp: doc["engineHp"],
+    //   fuelType: doc["fuelType"],
+    //   carTypeTitle: doc["carTypeTitle"],
+    //   carDesc: doc["carDesc"],
+    //   pickLat: doc["pickLat"],
+    //   pickLng: doc["pickLng"],
+    //   pickAddress: doc["pickAddress"],
+    //   carFacility: doc["carFacility"],
+    //   isFavorite: doc["isFavorite"],
+    //   typeId:'',
+    //   cityId: '',
+    //   brandId: '',
+    //   minHrs: doc["minHrs"],
+    //   totalKm:doc["totalKm"],
+    //   facilityImg: doc["facilityImg"],
+    //   carTypeImg: '',
+    //   carBrandTitle: doc["carBrandTitle"],
+    //   carBrandImg: doc["carBrandImg"],
+    //   carRentPriceDriver: '',
+    //   carAc:doc['carAc'],
+    //   bookeddate: List<Bookeddate>.from(doc["bookeddate"].map((x) => Bookeddate.fromFirebase(x))) ,
+    // );
   }).toList();
 
   return featureCarList;
@@ -274,8 +275,23 @@ Future<List<RecommendCar>> recommendCar() async {
         isBlock: "false",
         tax: "10%",
         currency: "USD",
-        cartypelist:carlists,
-        carbrandlist:carbrand,
+       // cartypelist:carlists,
+        //carbrandlist: carbrand,
+        cartypelist:  [
+          { "id": "1", "title": "SUV", "img": "https://carlink.cscodetech.cloud/images/cartype/1707989759.png" },
+          { "id": "2", "title": "Hatchback", "img": "https://carlink.cscodetech.cloud/images/cartype/1707989772.png" },
+          { "id": "3", "title": "Sedan", "img": "https://carlink.cscodetech.cloud/images/cartype/1707989786.png" },
+          { "id": "4", "title": "Luxury", "img": "https://carlink.cscodetech.cloud/images/cartype/1707989827.png" },
+          { "id": "5", "title": "Vans", "img": "https://carlink.cscodetech.cloud/images/cartype/1707989844.png" }
+        ].map((e) => Carlist.fromJson(e)).toList() ,
+        carbrandlist:  [
+          { "id": "1", "title": "Ferrari", "img": "https://carlink.cscodetech.cloud/images/carbrand/1711708677.png" },
+          { "id": "2", "title": "BMW", "img": "https://carlink.cscodetech.cloud/images/carbrand/1711708684.png" },
+          { "id": "3", "title": "Toyota", "img": "https://carlink.cscodetech.cloud/images/carbrand/1711708693.png" },
+          { "id": "4", "title": "Audi", "img": "https://carlink.cscodetech.cloud/images/carbrand/1711708703.png" },
+          { "id": "5", "title": "Lamborghini", "img": "https://carlink.cscodetech.cloud/images/carbrand/1711708726.png" },
+          { "id": "6", "title": "Tesla", "img": "https://carlink.cscodetech.cloud/images/carbrand/1711708736.png" }
+          ].map((e) => Carbrand.fromJson(e)).toList() ,
         featureCar:featureCar,
         recommendCars: [
           RecommendCar(
@@ -296,11 +312,7 @@ Future<List<RecommendCar>> recommendCar() async {
           ),
         ],
         showAddCar: "true",
-        recommendCar: [
-          RecommendCar(id: "2", carTitle: "bmw3", carImg: ["https://picsum.photos/250?image=9","https://picsum.photos/250?image=9","https://picsum.photos/250?image=9"], carRating: "carRating", carNumber: "50000", totalSeat: "totalSeat", carGear: "carGear", carRentPrice: "carRentPrice", priceType: "priceType", engineHp: "engineHp", fuelType: "fuelType", carTypeTitle: "carTypeTitle", carDistance: "carDistance", title: "title"),
-          RecommendCar(id: "2", carTitle: "bmw3", carImg: ["https://picsum.photos/250?image=9","https://picsum.photos/250?image=9","https://picsum.photos/250?image=9"], carRating: "carRating", carNumber: "50000", totalSeat: "totalSeat", carGear: "carGear", carRentPrice: "carRentPrice", priceType: "priceType", engineHp: "engineHp", fuelType: "fuelType", carTypeTitle: "carTypeTitle", carDistance: "carDistance", title: "title"),
-          RecommendCar(id: "2", carTitle: "bmw3", carImg: ["https://picsum.photos/250?image=9","https://picsum.photos/250?image=9","https://picsum.photos/250?image=9"], carRating: "carRating", carNumber: "50000", totalSeat: "totalSeat", carGear: "carGear", carRentPrice: "carRentPrice", priceType: "priceType", engineHp: "engineHp", fuelType: "fuelType", carTypeTitle: "carTypeTitle", carDistance: "carDistance", title: "title"),
-        ], responseMsg: '',
+        recommendCar: featureCar, responseMsg: '',
 
       );
        loading = false;
@@ -335,51 +347,61 @@ Future<List<RecommendCar>> recommendCar() async {
     return Scaffold(
       backgroundColor: notifire.getbgcolor,
       appBar: AppBar(
-        elevation: 0,
+        centerTitle: true,
         backgroundColor: notifire.getbgcolor,
-        leading: GestureDetector(
-          onTap: () {
-            lController.cityList().then((value) {
-              lController.commonBottomSheet(context).then((value) {
-                print(value);
-                homeBanner(id['id']);
-                locationSave();
-                setState(() {});
-              });
-            });
-          },
-          child: Container(
-            height: 45,
-            width: 45,
-            padding: EdgeInsets.all(8),
-            child: Image.asset(Appcontent.location, height: 25, width: 25, color: notifire.getwhiteblackcolor),
-            margin: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              border: Border.all(color: notifire.getborderColor),
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
+           elevation: 0,
+        title: Text(
+          "BlackRock",
+          style: TextStyle(color: notifire.getwhiteblackcolor),
         ),
-        title: InkWell(
-          onTap: () {
-            lController.cityList().then((value) {
-              lController.commonBottomSheet(context).then((value) {
-                print(value);
-                homeBanner(id['id']);
-                locationSave();
-              });
-            });
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Change Location".tr, style: TextStyle(fontFamily: FontFamily.europaWoff, color: notifire.getwhiteblackcolor, fontSize: 12)),
-              SizedBox(height: 4),
-              Text(lName ?? "No Location".tr, style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 15)),
-            ],
-          ),
-        ),
+      ),
+      // todo lovation app par
+      // appBar: AppBar(
+      //   elevation: 0,
+      //   backgroundColor: notifire.getbgcolor,
+      //   leading: GestureDetector(
+      //     onTap: () {
+      //       lController.cityList().then((value) {
+      //         lController.commonBottomSheet(context).then((value) {
+      //           print(value);
+      //           homeBanner(id['id']);
+      //           locationSave();
+      //           setState(() {});
+      //         });
+      //       });
+      //     },
+      //     child: Container(
+      //       height: 45,
+      //       width: 45,
+      //       padding: EdgeInsets.all(8),
+      //       child: Image.asset(Appcontent.location, height: 25, width: 25, color: notifire.getwhiteblackcolor),
+      //       margin: EdgeInsets.all(8),
+      //       decoration: BoxDecoration(
+      //         border: Border.all(color: notifire.getborderColor),
+      //         borderRadius: BorderRadius.circular(8),
+      //       ),
+      //     ),
+      //   ),
+      //   title: InkWell(
+      //     onTap: () {
+      //       lController.cityList().then((value) {
+      //         lController.commonBottomSheet(context).then((value) {
+      //           print(value);
+      //           homeBanner(id['id']);
+      //           locationSave();
+      //         });
+      //       });
+      //     },
+      //     child: Column(
+      //       crossAxisAlignment: CrossAxisAlignment.start,
+      //       mainAxisAlignment: MainAxisAlignment.center,
+      //       children: [
+      //         Text("Change Location".tr, style: TextStyle(fontFamily: FontFamily.europaWoff, color: notifire.getwhiteblackcolor, fontSize: 12)),
+      //         SizedBox(height: 4),
+      //         Text(lName ?? "No Location".tr, style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 15)),
+      //       ],
+      //     ),
+      //   ),
         // actions: [
         //   GestureDetector(
         //     onTap: () => Get.to(NotificationScreen()),
@@ -396,7 +418,7 @@ Future<List<RecommendCar>> recommendCar() async {
         //     ),
         //   ),
         // ],
-      ),
+      //),
       body: SafeArea(
         child: loading ? allHomeShimmer(): Column(
           children: [
@@ -711,25 +733,26 @@ Future<List<RecommendCar>> recommendCar() async {
 
                               Row(
                                 children: [
-                                  //Text("Car recommendation".tr, style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 18)),
+                                  Text("Car recommendation".tr, style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 18)),
                                   Spacer(),
-                                  //banner.recommendCar.isEmpty
-                                      true? SizedBox() : TextButton(
+                                  banner.recommendCar.isEmpty
+                                      ? SizedBox() : TextButton(
                                     onPressed: () {
                                       Get.to(recommendScreen(title: 'Car recommendation'.tr));
                                     },
                                     child: Text("View all".tr, style: TextStyle(fontFamily: FontFamily.europaWoff, color: greyScale1, fontSize: 15,),),),
+
                                 ],
                               ),
-                              //banner.recommendCar.isEmpty
+                              banner.recommendCar.isEmpty
 
                               //todo : emty car recommendation
-                                true  ?
-                                    SizedBox()
-                              //   Padding(
-                              //   padding: const EdgeInsets.symmetric(vertical: 10),
-                              //   child: ematyCar(title: 'Car recommendation'.tr,colors: notifire.getwhiteblackcolor),
-                              // )
+                                  ?
+                                    // SizedBox()
+                                Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                child: ematyCar(title: 'Car recommendation'.tr,colors: notifire.getwhiteblackcolor),
+                              )
                                     : ListView.builder(
                                 itemCount: banner.recommendCar.length,
                                 shrinkWrap: true,
@@ -737,7 +760,7 @@ Future<List<RecommendCar>> recommendCar() async {
                                 itemBuilder: (context, index2) {
                                   return InkWell(
                                     onTap: () {
-                                      Get.to(CarDetailsScreen(id: banner.recommendCar[index2].id, currency: banner.currency));
+                                      Get.to(CarDetailsScreen(id: banner.recommendCar[index2].id, currency: banner.currency,carInfo: CarInfo(carinfo:banner.recommendCar[index2] , galleryImages:banner.recommendCar[index2].carImg, responseCode: "responseCode", result: "result", responseMsg: "responseMsg")));
                                     },
                                     child: Container(
                                       width: Get.size.width,
@@ -957,26 +980,22 @@ Future<List<RecommendCar>> recommendCar() async {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-
-                height: 160,
-                width: Get.width,
-                margin: EdgeInsets.all(5),
-                alignment: Alignment.center,
-                padding: EdgeInsets.only(left: 10, right: 15),
-                child:Container(
+              height: 160,
+              width: Get.width,
+              margin: EdgeInsets.all(5),
+              alignment: Alignment.center,
+              padding: EdgeInsets.only(left: 10, right: 15),
+              child: Shimmer.fromColors(
+                baseColor: notifire.isDark ? Colors.black45 : Colors.grey.shade100,
+                highlightColor: notifire.isDark ? Color(0xFF475569) : Color(0xFFeaeff4),
+                child: Container(
                   margin: EdgeInsets.only(bottom: 8),
-                  width: 300, // Set the desired width
-                  height: 200, // Set the desired height
                   decoration: BoxDecoration(
-                    color: notifire.getblackwhitecolor,
-                    borderRadius: BorderRadius.circular(13),
-                    image: DecorationImage(
-                      image: NetworkImage("https://picsum.photos/250?image=9"),
-                      fit: BoxFit.cover,
-                    ),
+                      color: notifire.getblackwhitecolor,
+                      borderRadius: BorderRadius.circular(13)
                   ),
-                )
-
+                ),
+              ),
             ),
             Container(
               height: 55,

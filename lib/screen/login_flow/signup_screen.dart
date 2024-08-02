@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:carlink/utils/common.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:carlink/controller/signup_controller.dart';
 import 'package:carlink/screen/login_flow/login_screen.dart';
@@ -17,9 +18,12 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Add this import
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../bottombar/bottombar_screen.dart'; // Add this import
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -35,6 +39,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController fullName = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController mobileController = TextEditingController();
+  String ccode = "";
 
   late ColorNotifire notifire;
   File? _image;
@@ -61,6 +67,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
 
       if (userCredential.user != null) {
+        Get.offAll(BottomBarScreen());
+      await userCredential.user!.updateDisplayName("${fullName.text.trim()}-${ccode.trim()}${mobileController.text.trim()}");
+        await userCredential.user!.updatePhotoURL(imageUrl);
+
+
         await firestore.collection('users').doc(userCredential.user!.uid).set({
           "name": fullName.text,
           "email": emailController.text,
@@ -68,7 +79,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         });
 
         Fluttertoast.showToast(msg: "Registration successful!");
-        Get.to(() => LoginScreen());
       } else {
         Fluttertoast.showToast(msg: "Registration failed. Please try again.");
       }
@@ -199,6 +209,53 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             return 'Please enter a valid email address'.tr;
                           }
                           return null;
+                        },
+                      ),
+                      SizedBox(height: 15),
+                      IntlPhoneField(
+                        controller: mobileController,
+                        decoration: InputDecoration(
+                          counterText: "",
+                          filled: true,
+                          fillColor: notifire.getblackwhitecolor,
+                          enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(15)),
+                          hintText: 'Phone Number'.tr,
+                          hintStyle: TextStyle(
+                              color: greyColor,
+                              fontSize: 14,
+                              fontFamily: FontFamily.europaWoff),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: onbordingBlue),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: onbordingBlue),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                        style: TextStyle(
+                            color: notifire.getwhiteblackcolor,
+                            fontFamily: FontFamily.europaBold),
+                        flagsButtonPadding: EdgeInsets.only(left: 7),
+                        showCountryFlag: false,
+                        dropdownIcon:
+                        Icon(Icons.phone_outlined, color: greyScale),
+                        initialCountryCode: 'JO',
+                        onCountryChanged: (value) {
+                          setState(() {
+                            ccode = value.dialCode;
+                          });
+                        },
+                        onChanged: (number) {
+                          setState(() {
+                            ccode = number.countryCode;
+                          });
                         },
                       ),
                       SizedBox(height: 15),

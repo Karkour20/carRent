@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'homeData_modal.dart';
+
 FavoriteModal favoriteModalFromJson(String str) => FavoriteModal.fromJson(json.decode(str));
 
 String favoriteModalToJson(FavoriteModal data) => json.encode(data.toJson());
@@ -12,7 +14,7 @@ class FavoriteModal {
   String responseCode;
   String result;
   String responseMsg;
-  List<FavoretFeatureCar> featureCar;
+  List<FeatureCar> featureCar;
 
   FavoriteModal({
     required this.responseCode,
@@ -25,7 +27,7 @@ class FavoriteModal {
     responseCode: json["ResponseCode"],
     result: json["Result"],
     responseMsg: json["ResponseMsg"],
-    featureCar: List<FavoretFeatureCar>.from(json["FeatureCar"].map((x) => FavoretFeatureCar.fromJson(x))),
+    featureCar: List<FeatureCar>.from(json["FeatureCar"].map((x) => FeatureCar.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {

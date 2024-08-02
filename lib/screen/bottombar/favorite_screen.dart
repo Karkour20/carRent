@@ -2,6 +2,8 @@
 import 'dart:convert';
 import 'package:carlink/model/favorite_modal.dart';
 import 'package:carlink/utils/common.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:carlink/controller/favorite_controller.dart';
@@ -14,7 +16,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../model/carinfo_modal.dart';
+import '../../model/homeData_modal.dart';
 import '../../utils/App_content.dart';
+import '../detailcar/cardetails_screen.dart';
 
 class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});
@@ -24,10 +29,33 @@ class FavoriteScreen extends StatefulWidget {
 }
 
 class _FavoriteScreenState extends State<FavoriteScreen> {
+  FavoriteModal? favo;
+
+  CollectionReference<Map<String, dynamic>> collection=FirebaseFirestore.instance.collection('users')
+      .doc(FirebaseAuth.instance.currentUser!.uid).
+  collection('favorite');
+   featuredcars() async {
+
+
+    collection.snapshots().listen((event) {
+      List<FeatureCar> featureCarList = event.docs.map((doc) {
+        return  FeatureCar.fromJson(doc.data());
+      }).toList();
+      setState(() {
+favo=FavoriteModal(
+    responseCode: 'responseCode', result: 'result',
+    responseMsg: 'responseMsg',
+    featureCar: featureCarList);
+loaders = false;
+      });
+    });
+    //     .
+
+  }
   FavoriteController favoriteController = Get.find();
 
-  FavoriteModal? favo;
   bool loaders = true;
+
   Future favCar(uid, cityId) async {
     Map body = {
       "uid": uid,
@@ -97,8 +125,8 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
 
   @override
   void initState() {
-    latMap();
-    getValidate();
+    //latMap();
+    featuredcars();
     getdarkmodepreviousstate();
     super.initState();
     favoriteController.changShimmer();
@@ -130,106 +158,8 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                     return favoriteController.isLoading
                         ? GestureDetector(
                            onTap: () {
-                             Get.bottomSheet(
-                               isDismissible: false,
-                               backgroundColor: notifire.getbgcolor,
-                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(15))),
-                               SingleChildScrollView(
-                                 child: Padding(
-                                   padding: const EdgeInsets.all(10),
-                                   child: Column(
-                                     crossAxisAlignment:  CrossAxisAlignment.start,
-                                     children: [
-                                       Center(child: Text('Remove From Favorites?'.tr,style: TextStyle(color: notifire.getwhiteblackcolor,fontFamily: FontFamily.europaBold, fontSize: 18))),
-                                       Padding(
-                                         padding: const EdgeInsets.symmetric(vertical: 10),
-                                         child: Divider(
-                                           height: 10,
-                                           thickness: 1,
-                                           color: Colors.grey,
-                                         ),
-                                       ),
-                                       Row(
-                                         children: [
-                                           Container(
-                                             height: 80,
-                                             width: 100,
-                                             decoration: BoxDecoration(
-                                                 borderRadius: BorderRadius.circular(10),
-                                                 image: DecorationImage(image: NetworkImage('${Config.imgUrl}${favo?.featureCar[index].carImg.toString().split("\$;").elementAt(0)}'), fit: BoxFit.cover)
-                                             ),
-                                           ),
-                                           SizedBox(width: 10,),
-                                           Column(
-                                             crossAxisAlignment: CrossAxisAlignment.start,
-                                             children: [
-                                               Text(favo!.featureCar[index].carTitle, style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor)),
-                                               SizedBox(height: 8),
-                                               Text(favo!.featureCar[index].carNumber, style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor)),
-                                               SizedBox(
-                                                 height: 30,
-                                                 child: Row(
-                                                   children: [
-                                                     Image.asset(Appcontent.star1, height: 16),
-                                                     SizedBox(width: 5),
-                                                     Text(favo!.featureCar[index].carRating, style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor)),
-                                                   ],
-                                                 ),
-                                               ),
-                                             ],
-                                           ),
-                                         ],
-                                       ),
-                                       Padding(
-                                         padding: const EdgeInsets.only(top: 15),
-                                         child: Row(
-                                           children: [
-                                             Expanded(
-                                               child: OutlinedButton(
-                                                 style: OutlinedButton.styleFrom(
-                                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                                                   fixedSize: Size(Get.width, 50),
-                                                   side: BorderSide(color:  onbordingBlue)
-                                                 ),
-                                                   onPressed: () {
-                                                   Get.back();
-                                                   },
-                                                   child: Text('Cancel'.tr,style: TextStyle(color: onbordingBlue,fontFamily: FontFamily.europaBold),),
-                                               ),
-                                             ),
-                                             SizedBox(width: 10),
-                                             Expanded(
-                                               child: ElevatedButton(
-                                                 style: ElevatedButton.styleFrom(
-                                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                                                     fixedSize: Size(Get.width, 50),
-                                                     backgroundColor: onbordingBlue
-                                                 ),
-                                                   onPressed: () {
-                                                     favorite(userId['id'], favo?.featureCar[index].id).then((value) {
-                                                       if(value['ResponseCode'] == '200') {
-                                                         favCar(userId['id'], cId);
-                                                         setState(() {
-                                                           isLike = !isLike;
-                                                         });
-                                                         Get.back();
-                                                         Fluttertoast.showToast(msg: value['ResponseMsg']);
-                                                       } else {
-                                                         Fluttertoast.showToast(msg: value['ResponseMsg']);
-                                                       }
-                                                     });
-                                                   },
-                                                   child: Text('Yes, Remove'.tr,style: TextStyle(color: Colors.white,fontFamily: FontFamily.europaBold),),
-                                               ),
-                                             ),
-                                           ],
-                                         ),
-                                       ),
-                                     ],
-                                   ),
-                                 ),
-                               ),
-                             );
+                             Navigator.of(context).push(MaterialPageRoute(builder: (context) => CarDetailsScreen(id: favo!.featureCar[index].id, currency:  "JOD", carInfo: CarInfo(carinfo:favo!.featureCar[index] , galleryImages:favo!.featureCar[index].carImg, responseCode: "responseCode", result: "result", responseMsg: "responseMsg"),)));
+
                            },
                           child: Container(
                             height: 250,
@@ -242,7 +172,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                   width: Get.width,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
-                                    image: DecorationImage(image: NetworkImage('${Config.imgUrl}${favo?.featureCar[index].carImg.toString().split("\$;").elementAt(0)}'), fit: BoxFit.cover)
+                                    image: DecorationImage(image: NetworkImage('${Config.imgUrl}${favo?.featureCar[index].carImg.first}'), fit: BoxFit.cover)
                                   ),
                                   child: Stack(
                                     children: [
@@ -264,7 +194,114 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                       Positioned(
                                         top: 10,
                                         left: 10,
-                                        child: Image.asset(Appcontent.favorite,color: Colors.red,height: 28,),
+                                        child:
+                                        InkWell(
+                                            onTap: () {
+                                              Get.bottomSheet(
+                                                isDismissible: false,
+                                                backgroundColor: notifire.getbgcolor,
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(15))),
+                                                SingleChildScrollView(
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(10),
+                                                    child: Column(
+                                                      crossAxisAlignment:  CrossAxisAlignment.start,
+                                                      children: [
+                                                        Center(child: Text('Remove From Favorites?'.tr,style: TextStyle(color: notifire.getwhiteblackcolor,fontFamily: FontFamily.europaBold, fontSize: 18))),
+                                                        Padding(
+                                                          padding: const EdgeInsets.symmetric(vertical: 10),
+                                                          child: Divider(
+                                                            height: 10,
+                                                            thickness: 1,
+                                                            color: Colors.grey,
+                                                          ),
+                                                        ),
+                                                        Row(
+                                                          children: [
+                                                            Container(
+                                                              height: 80,
+                                                              width: 100,
+                                                              decoration: BoxDecoration(
+                                                                  borderRadius: BorderRadius.circular(10),
+                                                                  image: DecorationImage(image: NetworkImage('${Config.imgUrl}${favo?.featureCar[index].carImg.first}'), fit: BoxFit.cover)
+                                                              ),
+                                                            ),
+                                                            SizedBox(width: 10,),
+                                                            Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Text(favo!.featureCar[index].carTitle, style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor)),
+                                                                SizedBox(height: 8),
+                                                                Text(favo!.featureCar[index].carNumber, style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor)),
+                                                                SizedBox(
+                                                                  height: 30,
+                                                                  child: Row(
+                                                                    children: [
+                                                                      Image.asset(Appcontent.star1, height: 16),
+                                                                      SizedBox(width: 5),
+                                                                      Text(favo!.featureCar[index].carRating, style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor)),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Padding(
+                                                          padding: const EdgeInsets.only(top: 15),
+                                                          child: Row(
+                                                            children: [
+                                                              Expanded(
+                                                                child: OutlinedButton(
+                                                                  style: OutlinedButton.styleFrom(
+                                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                                                                      fixedSize: Size(Get.width, 50),
+                                                                      side: BorderSide(color:  onbordingBlue)
+                                                                  ),
+                                                                  onPressed: () {
+                                                                    Get.back();
+                                                                  },
+                                                                  child: Text('Cancel'.tr,style: TextStyle(color: onbordingBlue,fontFamily: FontFamily.europaBold),),
+                                                                ),
+                                                              ),
+                                                              SizedBox(width: 10),
+                                                              Expanded(
+                                                                child: ElevatedButton(
+                                                                  style: ElevatedButton.styleFrom(
+                                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                                                                      fixedSize: Size(Get.width, 50),
+                                                                      backgroundColor: onbordingBlue
+                                                                  ),
+                                                                  onPressed: () {
+                                                                    collection.doc(favo?.featureCar[index].id).delete();
+                                                                    Get.back();
+
+                                                                    // favorite(userId['id'], favo?.featureCar[index].id).then((value) {
+                                                                    //   if(value['ResponseCode'] == '200') {
+                                                                    //     favCar(userId['id'], cId);
+                                                                    //     setState(() {
+                                                                    //       isLike = !isLike;
+                                                                    //     });
+                                                                    //     Fluttertoast.showToast(msg: value['ResponseMsg']);
+                                                                    //   } else {
+                                                                    //     Fluttertoast.showToast(msg: value['ResponseMsg']);
+                                                                    //   }
+                                                                    // });
+                                                                  },
+                                                                  child: Text('Yes, Remove'.tr,style: TextStyle(color: Colors.white,fontFamily: FontFamily.europaBold),),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+
+                                            },
+                                            child: Image.asset(Appcontent.favorite,color: Colors.red,height: 28,)),
                                       ),
                                       Positioned(
                                         top: 10,

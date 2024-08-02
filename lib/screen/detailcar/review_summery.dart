@@ -1,5 +1,6 @@
 // ignore_for_file: non_constant_identifier_names, prefer_typing_uninitialized_variables, empty_catches, avoid_print
 import 'dart:convert';
+import 'dart:math';
 import 'package:carlink/model/booknow_modal.dart';
 import 'package:carlink/model/coupanlist_modal.dart';
 import 'package:carlink/model/couponcheck_modal.dart';
@@ -66,6 +67,7 @@ class _ReviewSummeryState extends State<ReviewSummery> {
   var coupon = 0;
 
   late ColorNotifire notifire;
+  User user=FirebaseAuth.instance.currentUser!;
 
   int payment = 0;
   int inDex = 0;
@@ -122,6 +124,8 @@ class _ReviewSummeryState extends State<ReviewSummery> {
       "book_type": bookType,
       "city_id": cityId,
     };
+    Random random = Random();
+
     Map<String, dynamic> body2 = {
       "car_id": carId,
       "uid": uId,
@@ -159,17 +163,21 @@ class _ReviewSummeryState extends State<ReviewSummery> {
       "owner_name": "karkour",
       "owner_contact": "01006565656",
       "owner_img": "https://media.istockphoto.com/id/1058477434/photo/smiling-man-standing-in-modern-car-center-and-posing.jpg?s=1024x1024&w=is&k=20&c=kDdYh2P1ZFKZBToRpVJdqPNNQla9kYllaGFOkw75gHI=",
-
       "engine_hp":  widget.featureCar.engineHp,
       "fuel_type":  widget.featureCar.fuelType,
       "total_seat":  widget.featureCar.totalSeat,
       "car_gear":  widget.featureCar.carRating,
       "cancle_reason": null,
-      "is_rate": "false",
+      "is_rate": "0",
       "Payment_method_name": gPayment?.paymentdata[payment].title,
-      "book_status": "Pick_up",
+      "book_status": "Pending",
       "exter_photo":[],
       "inter_photo": [],
+      "customer_name": user.displayName.toString().split("-")[0]??"no name",
+      "customer_contact": user.displayName.toString().split("-")[1] ??"no number",
+      "customer_img": user.photoURL??"no img",
+      "pick_otp": 1000 + random.nextInt(9000),
+      "drop_otp": 1000 + random.nextInt(9000),
     };
 
     print(body);
@@ -429,7 +437,7 @@ class _ReviewSummeryState extends State<ReviewSummery> {
                     razorPayClass.openCheckout(
                         key: gPayment!.paymentdata[0].attributes,
                         amount: totalPayment.toStringAsFixed(2),
-                        number: '${name.phoneNumber}',
+                        number: '${name.displayName.toString().split("-")[1]}',
                         name: '${name.email}');
                     Get.back();
                   } else if (gPayment?.paymentdata[payment].title == "PayTabs") {
@@ -521,8 +529,8 @@ class _ReviewSummeryState extends State<ReviewSummery> {
                               Get.to(SenangPay(
                                   email: name.email??"",
                                   totalAmount: totalPayment.toStringAsFixed(2),
-                                  name: name.displayName??"",
-                                  phon: name.phoneNumber??""))!
+                                  name: name.displayName.toString().split("-")[0]??"",
+                                  phon: name.displayName.toString().split("-")[1]??""))!
                                   .then((otid) {
                                 if (otid != null) {
                                   bNow(car['id'], id['id'], widget.toggle == true ? car['car_rent_price_driver'] : car['car_rent_price'], car['price_type'] == '1' ? 'hr' : 'days', widget.startDate, widget.sTime, widget.endDate, widget.eTime, coupon == 1 ? cList?.couponlist[inDex].id : '5', cAmt ?? '0', walletValue, car['price_type'] == '1' ? widget.hours : widget.days, total.toStringAsFixed(2), tax['tax'], totalTax,  totalPayment.toStringAsFixed(2) , gPayment?.paymentdata[0].id, "0", car['type_id'], car['brand_id'], widget.toggle == true ? 'With' : 'Without', car['city_id']);
@@ -545,7 +553,7 @@ class _ReviewSummeryState extends State<ReviewSummery> {
                               Get.to(MidTrans(
                                 email: name.email??"",
                                 totalAmount: totalPayment.toStringAsFixed(2),
-                                mobilenumber: name.phoneNumber))?.then((value) {
+                                mobilenumber: name.displayName.toString().split("-")[0]))?.then((value) {
                                   if(value != null){
                                     bNow(car['id'], id['id'], widget.toggle == true ? car['car_rent_price_driver'] : car['car_rent_price'], car['price_type'] == '1' ? 'hr' : 'days', widget.startDate, widget.sTime, widget.endDate, widget.eTime, coupon == 1 ? cList?.couponlist[inDex].id : '5', cAmt ?? '0', walletValue, car['price_type'] == '1' ? widget.hours : widget.days, total.toStringAsFixed(2), tax['tax'], totalTax,  totalPayment.toStringAsFixed(2) , gPayment?.paymentdata[0].id, "0", car['type_id'], car['brand_id'], widget.toggle == true ? 'With' : 'Without', car['city_id']);
                                   } else {
@@ -1495,7 +1503,7 @@ class _ReviewSummeryState extends State<ReviewSummery> {
 
       Fluttertoast.showToast(msg: "Please fix the errors in red before submitting.".tr,timeInSecForIosWeb: 4);
     } else {
-      var username = name.displayName ?? "";
+      var username = name.displayName.toString().split("-")[0] ?? "";
 
       var email = name.email ?? "";
       _paymentCard.name = username;

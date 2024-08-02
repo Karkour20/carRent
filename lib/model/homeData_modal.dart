@@ -4,6 +4,7 @@
 
 // ignore_for_file: file_names
 import 'package:carlink/model/carbrand.dart';
+import 'package:carlink/model/review_modal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'dart:convert';
@@ -25,7 +26,7 @@ class HomeBanner {
   List<Carlist> cartypelist;
   List<Carbrand> carbrandlist;
   List<FeatureCar> featureCar;
-  List<RecommendCar> recommendCar;
+  List<FeatureCar> recommendCar;
   String showAddCar;
 
   HomeBanner({
@@ -55,7 +56,7 @@ class HomeBanner {
     cartypelist: List<Carlist>.from(json["cartypelist"].map((x) => Carlist.fromJson(x))),
     carbrandlist: List<Carbrand>.from(json["carbrandlist"].map((x) => Carlist.fromJson(x))),
     featureCar: List<FeatureCar>.from(json["FeatureCar"].map((x) => FeatureCar.fromJson(x))),
-    recommendCar: List<RecommendCar>.from(json["Recommend_car"].map((x) => RecommendCar.fromJson(x))),
+    recommendCar: List<FeatureCar>.from(json["Recommend_car"].map((x) => FeatureCar.fromJson(x))),
     showAddCar: json["show_add_car"], recommendCars: [],
   );
 
@@ -176,6 +177,16 @@ class FeatureCar {
   String carAc;
   int isFavorite;
   List<Bookeddate>? bookeddate;
+  String carAvailable;
+  String carBrand;
+  String carStatus;
+  String carType;
+  String driverMobile;
+  String driverName;
+  String size;
+  String uid;
+  List<Reviewdatum> reviewdata;
+
 
   FeatureCar({
     required this.id,
@@ -207,41 +218,104 @@ class FeatureCar {
     required this.carRentPriceDriver,
     required this.carAc,
     required this.isFavorite,
+    required this.carAvailable,
+    required this.carBrand,
+    required this.carStatus,
+    required this.carType,
+    required this.driverMobile,
+    required this.driverName,
+    required this.size,
+    required this.uid,
+    required this.reviewdata,
      this.bookeddate
   });
 
-  factory FeatureCar.fromJson(Map<String, dynamic> json) =>
+  factory FeatureCar.
+  fromJson( Map<String, dynamic> json) =>
       FeatureCar(
         id: json["id"],
-        typeId: json["type_id"],
-        cityId: json["city_id"],
-        brandId: json["brand_id"],
-        minHrs: json["min_hrs"],
-        carTitle: json["car_title"],
-        carImg: List<String>.from(json["car_img"].map((x) => x)),
-        carRating: json["car_rating"],
-        carNumber: json["car_number"],
-        totalSeat: json["total_seat"],
-        carGear: json["car_gear"],
-        totalKm: json["total_km"],
-        pickLat: json["pick_lat"],
-        pickLng: json["pick_lng"],
-        pickAddress: json["pick_address"],
-        carDesc: json["car_desc"],
-        fuelType: json["fuel_type"],
-        priceType: json["price_type"],
-        engineHp: json["engine_hp"],
-        carFacility: json["car_facility"],
-        facilityImg: json["facility_img"],
-        carTypeTitle: json["car_type_title"],
-        carTypeImg: json["car_type_img"],
-        carBrandTitle: json["car_brand_title"],
-        carBrandImg: json["car_brand_img"],
-        carRentPrice: json["car_rent_price"],
-        carRentPriceDriver: json["car_rent_price_driver"],
-        carAc: json["car_ac"],
-        isFavorite: json["IS_FAVOURITE"], bookeddate: [],
+        typeId: json["typeId"],
+        cityId: json["cityId"],
+        brandId: json["brandId"],
+        minHrs: json["minHrs"],
+        carTitle: json["carTitle"],
+        carImg: List<String>.from(json["carImg"].map((x) => x)),
+        carRating: json["carRating"],
+        carNumber: json["carNumber"],
+        totalSeat: json["totalSeat"],
+        carGear: json["carGear"],
+        totalKm: json["totalKm"],
+        pickLat: json["pickLat"],
+        pickLng: json["pickLng"],
+        pickAddress: json["pickAddress"],
+        carDesc: json["carDesc"],
+        fuelType: json["fuelType"],
+        priceType: json["priceType"],
+        engineHp: json["engineHp"],
+        carFacility: json["carFacility"],
+        facilityImg: json["facilityImg"],
+        carTypeTitle: json["carTypeTitle"],
+        carTypeImg: json["carTypeImg"],
+        carBrandTitle: json["carBrandTitle"],
+        carBrandImg: json["carBrandImg"],
+        carRentPrice: json["carRentPrice"],
+        carRentPriceDriver: json["carRentPriceDriver"],
+        carAc: json["carAc"],
+        isFavorite: json["isFavorite"],
+        bookeddate: List<Bookeddate>.from(json["bookeddate"].map((x) => Bookeddate.fromFirebase(x))),
+        carAvailable: json["carAvailable"],
+        carBrand: json["carBrand"],
+        carStatus: json["carStatus"],
+        carType: json["carType"],
+        driverMobile: json["driverMobile"],
+        driverName: json["driverName"],
+        size: json["size"],
+        uid: json["uid"],
+        reviewdata: List<Reviewdatum>.from(json["reviewdata"].map((x) => Reviewdatum.fromFirebase(x))),
       );
+  Map<String, dynamic> toFirebase() =>
+      {
+        "id": id,
+        "typeId": typeId,
+        "cityId": cityId,
+        "brandId": brandId,
+        "minHrs": minHrs,
+        "carTitle": carTitle,
+        "carImg": List<dynamic>.from(carImg.map((x) => x)),
+        "carRating": carRating,
+        "carNumber": carNumber,
+        "totalSeat": totalSeat,
+        "carGear": carGear,
+        "totalKm": totalKm,
+        "pickLat": pickLat,
+        "pickLng": pickLng,
+        "pickAddress": pickAddress,
+        "carDesc": carDesc,
+        "fuelType": fuelType,
+        "priceType": priceType,
+        "engineHp": engineHp,
+        "carFacility": carFacility,
+        "facilityImg": facilityImg,
+        "carTypeTitle": carTypeTitle,
+        "carTypeImg": carTypeImg,
+        "carBrandTitle": carBrandTitle,
+        "carBrandImg": carBrandImg,
+        "carRentPrice": carRentPrice,
+        "carRentPriceDriver": carRentPriceDriver,
+        "carAc": carAc,
+        "isFavorite": isFavorite,
+        "bookeddate": List<dynamic>.from(bookeddate!.map((x) => x.toFirebase())), // Assuming Bookeddate has a toJson method
+        "carAvailable": carAvailable,
+        "carBrand": carBrand,
+        "carStatus": carStatus,
+        "carType": carType,
+        "driverMobile": driverMobile,
+        "driverName": driverName,
+        "size": size,
+        "uid": uid,
+      };
+
+
 
   Map<String, dynamic> toJson() =>
       {

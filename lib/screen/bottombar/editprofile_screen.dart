@@ -1,13 +1,17 @@
 // ignore_for_file: prefer_typing_uninitialized_variables, non_constant_identifier_names, empty_catches
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:carlink/model/proimage_modal.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:carlink/utils/config.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/App_content.dart';
@@ -30,7 +34,8 @@ class _EditScreenState extends State<EditScreen> {
 
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  TextEditingController mobileController = TextEditingController();
+  String ccode = "";
 String networkImage = "";
   var decode;
   var UId;
@@ -40,19 +45,20 @@ String networkImage = "";
     getlocaldata();
     super.initState();
   }
+  User decode1=FirebaseAuth.instance.currentUser!;
 
   getlocaldata() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    var decode1 = jsonDecode(preferences.getString('UserLogin')!);
+   // var decode1 = jsonDecode(preferences.getString('UserLogin')!);
     setState(() {
-      UId = decode1['id'];
-      nameController.text = decode1['name'];
-      emailController.text = decode1['email'];
-      passwordController.text = decode1['password'];
-      networkImage = decode1["profile_pic"];
+      UId = decode1.uid;
+      nameController.text = decode1.displayName!.split('-')[0];
+      emailController.text = decode1.email!;
+      mobileController.text = decode1.displayName!.split('-')[1].replaceAll("+962", '');
+      networkImage = decode1.photoURL!;
     });
   }
-  Future eprofile(uid, name, email, password) async {
+  Future eprofile(String uid,String name,String email,String password) async {
     Map body = {
       "uid" : uid,
       "name" : name,
@@ -60,15 +66,17 @@ String networkImage = "";
       "password" : password,
     };
     try {
-      var response = await http.post(Uri.parse(Config.baseUrl + Config.editProfile),
-          body: jsonEncode(body),
-          headers: {
-            'Content-Type': 'application/json',
-          });
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body.toString());
-        return data;
-      } else {}
+      if(nameController.text != decode1.displayName!.split('-')[0]){
+        decode1.updateDisplayName("${nameController.text.trim()}-${decode1.displayName!.split('-')[1]}");
+      }
+      if(emailController.text != decode1.email!){
+        decode1.updateEmail(emailController.text.trim());
+      }
+      if(mobileController.text != decode1.displayName!.split('-')[1].replaceAll("+962", '')){
+        decode1.updateDisplayName("${decode1.displayName!.split('-')[0]}-${ccode.trim()}${mobileController.text.trim()}");
+      }
+
+
     } catch (e) {}
   }
 
@@ -132,15 +140,15 @@ String networkImage = "";
         buttontext: "Save & Change".tr,
         style: TextStyle(color: WhiteColor, fontFamily: FontFamily.europaBold, fontSize: 15),
         onclick: () {
-          if(nameController.text.isNotEmpty && emailController.text.isNotEmpty && passwordController.text.isNotEmpty){
-            eprofile(UId, nameController.text, emailController.text, passwordController.text).then((value) {
-              if(value["ResponseCode"] == "200"){
+          if(nameController.text.isNotEmpty && emailController.text.isNotEmpty && mobileController.text.isNotEmpty){
+            eprofile('UId', nameController.text, emailController.text, mobileController.text).then((value) {
+             // if(value["ResponseCode"] == "200"){
                 Get.back();
-                Fluttertoast.showToast(msg: value['ResponseMsg']);
-              } else {
-                Fluttertoast.showToast(msg: value['ResponseMsg']);
-              }
-            });
+                Fluttertoast.showToast(msg: 'Profile updated successfully'.tr);
+            //   } else {
+            //     Fluttertoast.showToast(msg: value['ResponseMsg']);
+            //   }
+             });
           } else {
             Fluttertoast.showToast(msg: 'Please some your text!!'.tr);
           }
@@ -185,18 +193,23 @@ String networkImage = "";
                                                   setState(() {
                                                     selectImage = picked;
                                                   });
-
-                                                  List<int> imageByte =File(selectImage!.path).readAsBytesSync();
-                                                  base64String =base64Encode(imageByte);
-                                                  proImage(UId, base64String).then((value) {
-                                                    if(value["ResponseCode"]=="200"){
-                                                      getlocaldata();
-                                                      Get.back();
-                                                      Fluttertoast.showToast(msg: value["ResponseMsg"]);
-                                                    } else{
-                                                      Fluttertoast.showToast(msg: value["ResponseMsg"]);
-                                                    }
+                                                  String? imageUrl = await _uploadImage(File(picked.path));
+                                                  decode1.updatePhotoURL(imageUrl);
+                                                  setState(() {
+                                                    networkImage = imageUrl!;
                                                   });
+
+                                                  // List<int> imageByte =File(selectImage!.path).readAsBytesSync();
+                                                  // base64String =base64Encode(imageByte);
+                                                  // proImage(UId, base64String).then((value) {
+                                                  //   if(value["ResponseCode"]=="200"){
+                                                  //     getlocaldata();
+                                                      Get.back();
+                                                      Fluttertoast.showToast(msg: "image upload successfully".tr);
+                                                  //   } else{
+                                                  //     Fluttertoast.showToast(msg: value["ResponseMsg"]);
+                                                  //   }
+                                                  // });
                                                 } else{
                                                 }
                                               },
@@ -213,18 +226,19 @@ String networkImage = "";
                                                   setState(() {
                                                     selectImage = picked;
                                                   });
-
-                                                  List<int> imageByte =File(selectImage!.path).readAsBytesSync();
-                                                  base64String =base64Encode(imageByte);
-                                                  proImage(UId, base64String).then((value) {
-                                                    if(value["ResponseCode"]=="200"){
-                                                      getlocaldata();
-                                                      Get.back();
-                                                      Fluttertoast.showToast(msg: value["ResponseMsg"]);
-                                                    } else{
-                                                      Fluttertoast.showToast(msg: value["ResponseMsg"]);
-                                                    }
+                                                  String? imageUrl = await _uploadImage(File(picked.path));
+                                                  decode1.updatePhotoURL(imageUrl);
+                                                  setState(() {
+                                                    networkImage = imageUrl!;
                                                   });
+
+
+                                                  Get.back();
+                                                  Fluttertoast.showToast(msg: "image upload successfully".tr);
+                                                  //   } else{
+                                                  //     Fluttertoast.showToast(msg: value["ResponseMsg"]);
+                                                  //   }
+                                                  // });
                                                 } else{
                                                 }
                                               },
@@ -312,88 +326,93 @@ String networkImage = "";
                   },
                 ),
               ),
-              edit(title: 'Email address'.tr),
+              // edit(title: 'Email address'.tr),
+              // Container(
+              //   margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+              //   decoration: BoxDecoration(
+              //     color: notifire.getblackwhitecolor,
+              //     borderRadius: BorderRadius.circular(10),
+              //   ),
+              //   child: TextFormField(
+              //     controller: emailController,
+              //     keyboardType: TextInputType.emailAddress,
+              //     style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 16,),
+              //     decoration: InputDecoration(
+              //       focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: notifire.getbgcolor)),
+              //       enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: notifire.getbgcolor)),
+              //       border: OutlineInputBorder(
+              //         borderRadius: BorderRadius.circular(16),
+              //         borderSide: BorderSide(color: notifire.getbgcolor),
+              //       ),
+              //       hintText: 'Email address'.tr,
+              //       hintStyle: TextStyle(fontFamily: FontFamily.europaWoff, fontWeight: FontWeight.w500, fontSize: 16, color: greyScale1),
+              //       prefixIcon: Padding(
+              //         padding: const EdgeInsets.all(10),
+              //         child: Image.asset(Appcontent.mail, height: 24, width: 24,color: greyScale1),
+              //       ),
+              //     ),
+              //     validator: (value) {
+              //       if (value == null || value.isEmpty) {
+              //         return 'Please enter your email'.tr;
+              //       }
+              //       return null;
+              //     },
+              //   ),
+              // ),
+              edit(title: 'Phone Number'.tr),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                 decoration: BoxDecoration(
                   color: notifire.getblackwhitecolor,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: TextFormField(
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 16,),
+                child:  IntlPhoneField(
+                  controller: mobileController,
                   decoration: InputDecoration(
-                    focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: notifire.getbgcolor)),
-                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: notifire.getbgcolor)),
+                    counterText: "",
+                    filled: true,
+                    fillColor: notifire.getblackwhitecolor,
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(15)),
+                    hintText: 'Phone Number'.tr,
+                    hintStyle: TextStyle(
+                        color: greyColor,
+                        fontSize: 14,
+                        fontFamily: FontFamily.europaWoff),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: notifire.getbgcolor),
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    hintText: 'Email address'.tr,
-                    hintStyle: TextStyle(fontFamily: FontFamily.europaWoff, fontWeight: FontWeight.w500, fontSize: 16, color: greyScale1),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Image.asset(Appcontent.mail, height: 24, width: 24,color: greyScale1),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: onbordingBlue),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: onbordingBlue),
+                      borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email'.tr;
-                    }
-                    return null;
+                  style: TextStyle(
+                      color: notifire.getwhiteblackcolor,
+                      fontFamily: FontFamily.europaBold),
+                  flagsButtonPadding: EdgeInsets.only(left: 7),
+                  showCountryFlag: false,
+                  dropdownIcon:
+                  Icon(Icons.phone_outlined, color: greyScale),
+                  initialCountryCode: 'JO',
+                  onCountryChanged: (value) {
+                    setState(() {
+                      ccode = value.dialCode;
+                    });
+                  },
+                  onChanged: (number) {
+                    setState(() {
+                      ccode = number.countryCode;
+                    });
                   },
                 ),
-              ),
-              edit(title: 'Password'.tr),
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                decoration: BoxDecoration(
-                  color: notifire.getblackwhitecolor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: TextFormField(
-                  controller: passwordController,
-                  obscureText: passwordVisible,
-                  keyboardType: TextInputType.visiblePassword,
-                  style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 16),
-                  decoration: InputDecoration(
-                    focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: notifire.getbgcolor)),
-                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: notifire.getbgcolor)),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: notifire.getbgcolor),
-                    ),
-                    hintText: 'Password'.tr,
-                    hintStyle: TextStyle(fontFamily: FontFamily.europaWoff, fontWeight: FontWeight.w500, fontSize: 16, color: greyScale1),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Image.asset(Appcontent.lock, height: 24, width: 24,color: greyScale1),
-                    ),
-                    suffixIcon: InkWell(
-                      onTap: () {
-                        setState(() {
-                          passwordVisible =! passwordVisible;
-                        });
-                      },
-                      child: passwordVisible
-                          ? Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Image.asset("assets/eye-off.png", height: 25, width: 25, color: greyColor),
-                      )
-                          : Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Image.asset("assets/eye.png", height: 25, width: 25, color: greyColor),
-                      ),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password'.tr;
-                    }
-                    return null;
-                  },
-                ),
+
               ),
             ],
           ),
@@ -407,4 +426,26 @@ String networkImage = "";
       child: Text(title, style:  TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 14, fontWeight: FontWeight.w700),),
     );
   }
+}
+
+Future<String?> _uploadImage(File? image) async {
+  if (image != null) {
+    try {
+      String fileName = 'personal_id/${DateTime.now().millisecondsSinceEpoch}.png';
+      Reference firebaseStorageRef = FirebaseStorage.instance.ref().child(fileName);
+      UploadTask uploadTask = firebaseStorageRef.putFile(image!);
+      TaskSnapshot taskSnapshot = await uploadTask.timeout(const Duration(minutes: 5));
+      return await taskSnapshot.ref.getDownloadURL();
+    } catch (e) {
+      if (e is FirebaseException) {
+        print("FirebaseException: ${e.message}");
+      } else if (e is TimeoutException) {
+        print("TimeoutException: Upload timed out");
+      } else {
+        print("Unknown exception: $e");
+      }
+      return null;
+    }
+  }
+  return null;
 }

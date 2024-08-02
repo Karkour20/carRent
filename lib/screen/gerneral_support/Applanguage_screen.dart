@@ -995,7 +995,7 @@ class LocalString extends Translations{
       "Top Up": "فوق حتى",
       "Done For Now": "تم الآن",
       "Another Top Up": "تعبئة أخرى",
-      "Home": "بيت",
+      "Home": "الرئيسية",
       "Favorites": "المفضلة",
       "hp": "حصان",
       "Automatic": "تلقائي",

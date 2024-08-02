@@ -5,6 +5,7 @@ import 'package:carlink/screen/addcar_screens/Listcar_screen.dart';
 import 'package:carlink/screen/addcar_screens/addcar_screen.dart';
 import 'package:carlink/screen/addcar_screens/mybooking_screen.dart';
 import 'package:carlink/screen/login_flow/login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:carlink/utils/App_content.dart';
 import 'package:carlink/utils/Colors.dart';
@@ -65,27 +66,33 @@ class _CarInfoScreenState extends State<CarInfoScreen> {
       "uid" : uId,
     };
     try{
-      var response = await http.post(Uri.parse(Config.baseUrl+Config.dashboard), body: jsonEncode(body), headers: {
-        'Content-Type': 'application/json',
+      // var response = await http.post(Uri.parse(Config.baseUrl+Config.dashboard), body: jsonEncode(body), headers: {
+      //   'Content-Type': 'application/json',
+      // });
+      // if(response.statusCode == 200){
+      setState(() {
+        dashboardModal = DashboardModal(
+            reportData: [ReportDatum(title: "title", reportData: "1", url: "https://firebasestorage.googleapis.com/v0/b/serves-ltxnrk.appspot.com/o/personal_id%2F1721652408574.png?alt=media&token=4474872e-c3c9-4d13-a6f7-ac08bc3ee0fe"),],result: "result", responseMsg: "responseMsg", currency: "JOD", responseCode: '') ;//dashboardModalFromJson(response.body);
+        isLoading =false;
       });
-      if(response.statusCode == 200){
-        setState(() {
-          dashboardModal = dashboardModalFromJson(response.body);
-          isLoading =false;
-        });
-        var data = jsonDecode(response.body.toString());
-
-        return data;
-      } else {
-        var data = jsonDecode(response.body.toString());
-        return data;
-      }
-    } catch(e){
+      //   var data = jsonDecode(response.body.toString());
+      //
+      //   return data;
+      // } else {
+      //   var data = jsonDecode(response.body.toString());
+      //   return data;
+      // }
+    }
+    catch(e){
       debugPrint(e.toString());
     }
   }
 
-  var name;
+  var name={
+    "name":FirebaseAuth.instance.currentUser!.displayName?.split('-')[0],
+    "email":FirebaseAuth.instance.currentUser!.email!,
+    "profile_pic":FirebaseAuth.instance.currentUser!.photoURL
+  };
   var admin;
 
   var data;
@@ -93,12 +100,12 @@ class _CarInfoScreenState extends State<CarInfoScreen> {
 
   String uid = '';
   save() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    String user =  preferences.getString("Usertype")!;
-    user == "ADMIN" ? data1 = preferences.getString('AdminLogin')! : data = preferences.getString('UserLogin')!;
-    user == "ADMIN" ?  admin = data1.toString().isNotEmpty ? jsonDecode(data1) : "": name = data.toString().isNotEmpty? jsonDecode(data) : "";
-
-    uid = user == "ADMIN" ? "0" :name['id'];
+    // SharedPreferences preferences = await SharedPreferences.getInstance();
+    // String user =  preferences.getString("Usertype")!;
+    // user == "ADMIN" ? data1 = preferences.getString('AdminLogin')! : data = preferences.getString('UserLogin')!;
+    // user == "ADMIN" ?  admin = data1.toString().isNotEmpty ? jsonDecode(data1) : "": name = data.toString().isNotEmpty? jsonDecode(data) : "";
+    //
+    // uid = user == "ADMIN" ? "0" :name['id'];
     setState(() {});
     dashboard(uid);
   }
@@ -175,8 +182,8 @@ class _CarInfoScreenState extends State<CarInfoScreen> {
                   maxRadius: 20,
                   backgroundImage: NetworkImage('${Config.imgUrl}${name['profile_pic']}'),
                 ),
-                title: isLoading ? SizedBox() : Text(name['name'], style: TextStyle(fontSize: 18,color: Colors.white,fontFamily: FontFamily.europaBold)),
-                subtitle: isLoading ? SizedBox() : Text(name['email'], style: TextStyle(fontSize: 12,color: greyScale,fontFamily: FontFamily.europaWoff)),
+                title: isLoading ? SizedBox() : Text(name['name']!, style: TextStyle(fontSize: 18,color: Colors.white,fontFamily: FontFamily.europaBold)),
+                subtitle: isLoading ? SizedBox() : Text(name['email']!, style: TextStyle(fontSize: 12,color: greyScale,fontFamily: FontFamily.europaWoff)),
                 trailing: InkWell(
                   onTap: () {
                     Get.to(NotificationScreen(uid: uid == "0" ? "0" : name['id'],));

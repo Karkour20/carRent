@@ -8,6 +8,8 @@ import 'package:carlink/model/facillity_modal.dart';
 import 'package:carlink/utils/common.dart';
 import 'package:carlink/utils/common_textfield.dart';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -95,30 +97,122 @@ class _AddCarScreenState extends State<AddCarScreen> {
     'Publish'.tr,
     'Unpublish'.tr,
   ];
-bool isvalidate = false;
-bool isvalidate1 = false;
-bool isvalidate2 = false;
-bool isvalidate3 = false;
-bool isvalidate4 = false;
-bool isvalidate5 = false;
-bool isvalidate6 = false;
-bool isvalidate7 = false;
-bool isvalidate8 = false;
+  bool isvalidate = false;
+  bool isvalidate1 = false;
+  bool isvalidate2 = false;
+  bool isvalidate3 = false;
+  bool isvalidate4 = false;
+  bool isvalidate5 = false;
+  bool isvalidate6 = false;
+  bool isvalidate7 = false;
+  bool isvalidate8 = false;
 
   FacilitylistModal? facilitylistModal;
   bool isLoading= true;
   Future facilites() async {
-    try{
-      var response = await http.post(Uri.parse('${Config.baseUrl}${Config.facilityList}'),  headers: {
-        'Content-Type': 'application/json',
-      });
-      if(response.statusCode == 200){
+    // try{
+    //   var response = await http.post(Uri.parse('${Config.baseUrl}${Config.facilityList}'),  headers: {
+    //     'Content-Type': 'application/json',
+    //   });
+    //
+    //   if(response.statusCode == 200){
+    //     print(response.body);
         setState(() {
-          facilitylistModal =facilitylistModalFromJson(response.body);
+          facilitylistModal =facilitylistModalFromJson('''{"facilitylist": [
+        {
+            "id": "1",
+            "title": "Bluetooth connectivity",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711545.png"
+        },
+        {
+            "id": "2",
+            "title": "Air Conditioning",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711555.png"
+        },
+        {
+            "id": "3",
+            "title": "Power Windows",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711566.png"
+        },
+        {
+            "id": "4",
+            "title": "Power steering",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711626.png"
+        },
+        {
+            "id": "5",
+            "title": "Keyless Entry",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711642.png"
+        },
+        {
+            "id": "6",
+            "title": "Voice control",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711654.png"
+        },
+        {
+            "id": "7",
+            "title": "Music System",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711663.png"
+        },
+        {
+            "id": "8",
+            "title": "USB charger",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711673.png"
+        },
+        {
+            "id": "9",
+            "title": "Aux Cable",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711688.png"
+        },
+        {
+            "id": "10",
+            "title": "Air Freshener",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711699.png"
+        },
+        {
+            "id": "11",
+            "title": "Air purifier",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711717.png"
+        },
+        {
+            "id": "12",
+            "title": "Airbags",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711738.png"
+        },
+        {
+            "id": "13",
+            "title": "Toolkit",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711752.png"
+        },
+        {
+            "id": "14",
+            "title": "Spare Tyre",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711817.png"
+        },
+        {
+            "id": "15",
+            "title": "Anti-lock Braking",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711828.png"
+        },
+        {
+            "id": "16",
+            "title": " Reverse Camera",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711843.png"
+        },
+        {
+            "id": "17",
+            "title": "Push Button Start",
+            "img": "https://carlink.cscodetech.cloud/images/facility/1711711854.png"
+        }
+    ],
+    "ResponseCode": "200",
+    "Result": "true",
+    "ResponseMsg": "Facility List Founded!"
+}''');
           // isLoading = false;
         });
-      } else {}
-    }catch(e){}
+    //   } else {}
+    // }catch(e){}
   }
 
   bool loading = true;
@@ -147,90 +241,185 @@ bool isvalidate8 = false;
   }
   CarType? cType;
   Future type() async {
-    Map body = {
-    };
-    try {
-      var response = await http.post(Uri.parse(Config.baseUrl + Config.carType), body: jsonEncode(body), headers: {
-        'Content-Type': 'application/json',
-      });
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body.toString());
+    // Map body = {
+    // };
+    // try {
+    //   var response = await http.post(Uri.parse(Config.baseUrl + Config.carType), body: jsonEncode(body), headers: {
+    //     'Content-Type': 'application/json',
+    //   });
+    //   if (response.statusCode == 200) {
+    //     var data = jsonDecode(response.body.toString());
+    //     print(data);
+
         setState(() {
-          cType = carTypeFromJson(response.body);
+          cType = carTypeFromJson('''{
+            "cartypelist": [
+    { "id": "1", "title": "SUV", "img": "https://carlink.cscodetech.cloud/images/cartype/1707989759.png" },
+    { "id": "2", "title": "Hatchback", "img": "https://carlink.cscodetech.cloud/images/cartype/1707989772.png" },
+    { "id": "3", "title": "Sedan", "img": "https://carlink.cscodetech.cloud/images/cartype/1707989786.png" },
+    { "id": "4", "title": "Luxury", "img": "https://carlink.cscodetech.cloud/images/cartype/1707989827.png" },
+    { "id": "5", "title": "Vans", "img": "https://carlink.cscodetech.cloud/images/cartype/1707989844.png" }
+  ],
+  "ResponseCode": "200",
+  "Result": "true",
+  "ResponseMsg": "Car Type List Founded!"
+          }''');
           loading = false;
         });
-        return data;
-      } else {}
-    } catch (e) {}
+    //     return data;
+    //   } else {}
+    // } catch (e) {}
   }
   CarBrand? cBrand;
   Future brand() async {
-    try {
-      var response = await http.post(Uri.parse(Config.baseUrl + Config.carBrand), headers: {
-        'Content-Type': 'application/json',
-      });
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body.toString());
+    // try {
+    //   var response = await http.post(Uri.parse(Config.baseUrl + Config.carBrand), headers: {
+    //     'Content-Type': 'application/json',
+    //   });
+    //   if (response.statusCode == 200) {
+    //     var data = jsonDecode(response.body.toString());
+        //print(data);
         setState(() {
-          cBrand = carBrandFromJson(response.body);
+          cBrand = carBrandFromJson('''{
+  "carbrandlist": [
+    { "id": "1", "title": "Ferrari", "img": "https://carlink.cscodetech.cloud/images/carbrand/1711708677.png" },
+    { "id": "2", "title": "BMW", "img": "https://carlink.cscodetech.cloud/images/carbrand/1711708684.png" },
+    { "id": "3", "title": "Toyota", "img": "https://carlink.cscodetech.cloud/images/carbrand/1711708693.png" },
+    { "id": "4", "title": "Audi", "img": "https://carlink.cscodetech.cloud/images/carbrand/1711708703.png" },
+    { "id": "5", "title": "Lamborghini", "img": "https://carlink.cscodetech.cloud/images/carbrand/1711708726.png" },
+    { "id": "6", "title": "Tesla", "img": "https://carlink.cscodetech.cloud/images/carbrand/1711708736.png" }
+  ],
+  "ResponseCode": "200",
+  "Result": "true",
+  "ResponseMsg": "Car Brand List Founded!"
+}
+          ''');
           loading = false;
         });
-        return data;
-      } else {}
-    } catch (e) {}
+      //   return data;
+      // } else {}
+   // } catch (e) {}
   }
   Future addCar(carNumber, status, rating, seat, carAc, carTitle, dName, dMobile, gear, facility, type, brand, available, rPrice, rPriceDriver, engine, price, fuel, desc, pickAddress, lat, lng, totalKm, size, uId, minHrs) async {
-    var headers = {
-      'Cookie': 'PHPSESSID=36pnj5phm83llglrqid2qnuquk'
+    DocumentReference docRef = FirebaseFirestore.instance.collection('featuredcars').doc();
+    String facilityList = facilitylistModal!.facilitylist.where((element) => multiSelect.contains(element.img)).toList().map((e) => e.title).toList().join(',');
+    // Get the generated document ID
+    print("this is facilityList: ${facilityList}");
+    String documentId = docRef.id;
+    List<String> imageList = await uploadImages(image);
+    Map<String, dynamic> data={
+      "carNumber": carNumber,
+      "carStatus": status,
+      "carRating": rating,
+      "totalSeat": seat,
+      "carAc": carAc,
+      "carTitle": carTitle,
+      "driverName": dName,
+      "driverMobile": dMobile,
+      "carGear": gear,
+      "carFacility":facilityList ,
+      "carType": cType!.cartypelist[selectType].title,
+      "carBrand": cBrand!.carbrandlist[selectBrand].title,
+      "carAvailable": available,
+      "carRentPrice": rPrice,
+      "carRentPriceDriver": rPriceDriver,
+      "engineHp": engine,
+      "priceType": price,
+      "fuelType": fuel,
+      "carDesc": desc,
+      "pickAddress": pickAddress,
+      "pickLat": lat.toString(),
+      "pickLng": lng.toString(),
+      "totalKm": totalKm,
+      "size": size,
+      "uid": uId,
+      "minHrs": minHrs,
+      "bookeddate": [],
+      "reviewdata":[],
+      "brandId": brand,
+      "carBrandImg": cBrand!.carbrandlist[selectBrand].img,
+      "carBrandTitle": cBrand!.carbrandlist[selectBrand].title,
+      "carTypeImg": cType!.cartypelist[selectType].img,
+      "carTypeTitle": cType!.cartypelist[selectType].title,
+      "cityId": "1",
+      "facilityImg": facility,
+      "id": documentId,
+      "isFavorite": 0,
+      "typeId": cType!.cartypelist[selectType].id,
+      "carImg": imageList
+
     };
-    var request = http.MultipartRequest('POST', Uri.parse('${Config.baseUrl}${Config.addCar}'));
-    request.fields.addAll({
-      'car_number': carNumber,
-      'car_status': status,
-      'car_rating': rating,
-      'total_seat': seat,
-      'car_ac': carAc,
-      'car_title': carTitle,
-      'driver_name': dName,
-      'driver_mobile': dMobile,
-      'car_gear': gear,
-      'car_facility': facility,
-      'car_type': type,
-      'car_brand': brand,
-      'car_available': available,
-      'car_rent_price': rPrice,
-      'car_rent_price_driver': rPriceDriver,
-      'engine_hp': engine,
-      'price_type': price,
-      'fuel_type': fuel,
-      'car_desc': desc,
-      'pick_address': pickAddress,
-      'pick_lat': lat.toString(),
-      'pick_lng': lng.toString(),
-      'total_km': totalKm,
-      'size': size,
-      'uid': uId,
-      'min_hrs': minHrs,
-    });
-    for(int a=0; a<image.length; a++){
-      request.files.add(await http.MultipartFile.fromPath('carphoto$a', image[a]));
-      print(image[a]);
-    }
-    request.headers.addAll(headers);
 
-    http.StreamedResponse response = await request.send();
 
-    if (response.statusCode == 200) {
-      var data = jsonDecode(await response.stream.bytesToString());
-      return data;
-    }
-    else {
-      var data = jsonDecode(await response.stream.bytesToString());
-      return data;
-    }
+   docRef.set(data);
+
+    // if (response.statusCode == 200) {
+    //   var data = jsonDecode(await response.stream.bytesToString());
+    //   return data;
+    // }
+    // else {
+    //   var data = jsonDecode(await response.stream.bytesToString());
+    //   return data;
+    // }
+  }
+  Future update(carNumber, status, rating, seat, carAc, carTitle, dName, dMobile, gear, facility, type, brand, available, rPrice, rPriceDriver, engine, price, fuel, desc, pickAddress, lat, lng, totalKm, size, uId, minHrs) async {
+    DocumentReference docRef = FirebaseFirestore.instance.collection('featuredcars').doc(widget.recordId);
+    String facilityList = facilitylistModal!.facilitylist.where((element) => multiSelect.contains(element.img)).toList().map((e) => e.title).toList().join(',');
+
+    // Get the generated document ID
+    List<String> imageList = await uploadImages(image);
+    Map<String, dynamic> data={
+      "carNumber": carNumber,
+      "carStatus": status,
+      "carRating": rating,
+      "totalSeat": seat,
+      "carAc": carAc,
+      "carTitle": carTitle,
+      "driverName": dName,
+      "driverMobile": dMobile,
+      "carGear": gear,
+      "carFacility": facilityList,
+      "carType": cType!.cartypelist[selectType].title,
+      "carBrand": cBrand!.carbrandlist[selectBrand].title,
+      "carAvailable": available,
+      "carRentPrice": rPrice,
+      "carRentPriceDriver": rPriceDriver,
+      "engineHp": engine,
+      "priceType": price,
+      "fuelType": fuel,
+      "carDesc": desc,
+      "pickAddress": pickAddress,
+      "pickLat": lat.toString(),
+      "pickLng": lng.toString(),
+      "totalKm": totalKm,
+      "size": size,
+      "uid": uId,
+      "minHrs": minHrs,
+      "brandId": brand,
+      "carBrandImg": cBrand!.carbrandlist[selectBrand].img,
+      "carBrandTitle": cBrand!.carbrandlist[selectBrand].title,
+      "carTypeImg": cType!.cartypelist[selectType].img,
+      "carTypeTitle": cType!.cartypelist[selectType].title,
+      "facilityImg": facility,
+      "typeId": cType!.cartypelist[selectType].id,
+      "carImg": imageList
+
+    };
+
+
+    docRef.update(data);
+
+    // if (response.statusCode == 200) {
+    //   var data = jsonDecode(await response.stream.bytesToString());
+    //   return data;
+    // }
+    // else {
+    //   var data = jsonDecode(await response.stream.bytesToString());
+    //   return data;
+    // }
   }
 
-  Future update({required String number, required String status, required String rate, required String seat, required String ac, required String cName, required String dName, required String mobileNo, required String carGear, required String carFacility, required String type,required String brand, required String location, required String without, required String withrent, required String engine, required String price, required String fuel, required String desc, required String address, required String lat, required String long, required String totalKm,  required String size, required String imgList, required String minHrs}) async {
+  Future update1({required String number, required String status, required String rate, required String seat, required String ac, required String cName, required String dName, required String mobileNo, required String carGear, required String carFacility, required String type,required String brand, required String location, required String without, required String withrent, required String engine, required String price, required String fuel, required String desc, required String address, required String lat, required String long, required String totalKm,  required String size, required String imgList, required String minHrs}) async {
     var headers = {
       'Cookie': 'PHPSESSID=50rkm1fprfmse0j5lmfhntcqlf'
     };
@@ -311,11 +500,11 @@ bool isvalidate8 = false;
 
   var userData;
   save() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userData = jsonDecode(prefs.getString('UserLogin') ?? '0');
-    cityList();
-    button == true ? null : listCar(widget.uid == "0" ? "0" : userData['id']);
-    print('+ + + + + ${widget.uid == "0" ? "0" : userData['id']}');
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    // userData = jsonDecode(prefs.getString('UserLogin') ?? '0');
+    // cityList();
+    // button == true ? null : listCar(widget.uid == "0" ? "0" : userData['id']);
+    // print('+ + + + + ${widget.uid == "0" ? "0" : userData['id']}');
   }
 
   List temp=[];
@@ -337,8 +526,8 @@ bool isvalidate8 = false;
         for(int i=0; i<myCarListModal!.mycarlist.length; i++){
           temp.add(0);
         }
-          netImg = myCarListModal!.mycarlist[int.parse(widget.id.toString())].carImg.toString().split("\$;");
-          setState(() {});
+        netImg = myCarListModal!.mycarlist[int.parse(widget.id.toString())].carImg.toString().split("\$;");
+        setState(() {});
         var data = jsonDecode(response.body.toString());
         return data;
       } else{}
@@ -370,6 +559,7 @@ bool isvalidate8 = false;
   String text = "";
   @override
   Widget build(BuildContext context) {
+
     notifire =Provider.of(context,listen: true);
     return Scaffold(
       backgroundColor: notifire.getbgcolor,
@@ -384,7 +574,7 @@ bool isvalidate8 = false;
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               fixedSize: Size(Get.width, 50)
           ),
-          onPressed: () {
+          onPressed: () async{
             setState(() {
               if(carStatus != null){
                 isvalidate = false;
@@ -436,21 +626,16 @@ bool isvalidate8 = false;
               setState(() {
                 load = true;
               });
-              addCar(cNumberController.text, carStatus, ratingController.text, seatController.text, ac, nameController.text, driverController.text,  mobileController.text, gear, multiSelect.join(','), carType, carBrand, dropId, withoutRent.text, withRent.text, engineController.text, carPrice, carFuel, descController.text, addressController.text, lats ?? _currentPosition?.latitude, lng ?? _currentPosition?.longitude, totalKmController.text, image.length.toString(),widget.uid == "0" ? "0" : userData['id'], minimumController.text).then((value) {
-                if(value["ResponseCode"] == "200"){
-                  Fluttertoast.showToast(msg: value["ResponseMsg"]);
-                  listCar(widget.uid == "0" ? "0" : userData['id']);
-                  dashboard(widget.uid == "0" ? "0" : userData['id']);
+             await addCar(cNumberController.text, carStatus, ratingController.text, seatController.text, ac, nameController.text, driverController.text,  mobileController.text, gear, multiSelect.join(','), carType, carBrand, dropId, withoutRent.text, withRent.text, engineController.text, carPrice, carFuel, descController.text, addressController.text, lats ?? _currentPosition?.latitude, lng ?? _currentPosition?.longitude, totalKmController.text, image.length.toString(),widget.uid == "0" ? "0" : "userData['id']", minimumController.text).then((value) {
+                // if(value["ResponseCode"] == "200"){
+                //   Fluttertoast.showToast(msg: value["ResponseMsg"]);
+                //   listCar(widget.uid == "0" ? "0" : userData['id']);
+                //   dashboard(widget.uid == "0" ? "0" : userData['id']);
                   setState(() {
                     load = false;
                   });
                   Get.back();
-                } else{
-                  setState(() {
-                    load=false;
-                  });
-                  Fluttertoast.showToast(msg: value["ResponseMsg"]);
-                }
+
               });
             }else{
               Fluttertoast.showToast(msg: 'Please some your text!!');
@@ -459,79 +644,84 @@ bool isvalidate8 = false;
           child: Text('Add Car'.tr,style: TextStyle(color: Colors.white,fontFamily: FontFamily.europaBold)),
         )
             :load1 ? loader() : ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: onbordingBlue,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    fixedSize: Size(Get.width, 50)
-                ),
-                onPressed: () {
-                  setState(() {
-                    if(carStatus != null){
-                      isvalidate = false;
-                    }else {
-                      isvalidate = true;
-                    }
-                    if(ac != null){
-                      isvalidate2 = false;
-                    }else{
-                      isvalidate2 = true;
-                    }
-                    if(gear != null){
-                      isvalidate2 = false;
-                    }else{
-                      isvalidate3 = true;
-                    }
-                    if(multiSelect.isNotEmpty){
-                      isvalidate4 = false;
-                    }else{
-                      isvalidate4 = true;
-                    }
-                    if(carType != null){
-                      isvalidate5 = false;
-                    }else{
-                      isvalidate5 = true;
-                    }
-                    if(carBrand != null){
-                      isvalidate6 = false;
-                    }else{
-                      isvalidate6 = true;
-                    }
-                    if(carPrice != null){
-                      isvalidate7 = false;
-                    }else{
-                      isvalidate7 = true;
-                    }
-                    if(carFuel != null){
-                      isvalidate8 = false;
-                    }else{
-                      isvalidate8 = true;
-                    }
-                  });
-                  if(_formKey.currentState!.validate() && carStatus!= null && gear != null && multiSelect.isNotEmpty && carType != null && carBrand != null && carPrice != null && carFuel != null){
-                    setState(() {
-                      load1 = true;
-                    });
-                    update(number: cNumberController.text, status: carStatus, rate: ratingController.text, seat: seatController.text, ac: ac, cName: nameController.text, dName: driverController.text, mobileNo: mobileController.text, carGear: gear, carFacility: multiSelect.join(","), type: carType, brand: carBrand, location: dropId, without: withoutRent.text, withrent: withRent.text, engine: engineController.text, price: carPrice, fuel: carFuel, desc: descController.text, address: addressController.text, lat: latController.text, long: lngController.text, totalKm: totalKmController.text, size: image.length.toString(), imgList: netImg.isEmpty ? '0' : netImg.join('\$;'), minHrs: minimumController.text).then((value) {
-                      print('!!!!!!!!!!!!!$value');
-                      if(value["ResponseCode"] == "200"){
-                        Fluttertoast.showToast(msg: value["ResponseMsg"]);
-                        // edit(carName: nameController.text, carNumber: cNumberController.text, status: carStatus, uploadImage: image, AC: ac, carGear: gear, carFacility: multiSelect.toString(), type: carType, brand: carBrand, driverName: driverController.text, mobile: mobileController.text, rating: ratingController.text, seat: seatController.text, location: locationName.toString(), without: withoutRent.text, withrent: withRent.text, engine: engineController.text, pType: carPrice, fuel: carFuel, lat: latController.text, long: lngController.text, totalKm: totalKmController.text, desc: descController.text, address: addressController.text, minimum: minimumController.text);
-                        setState(() {
-                          load1 = false;
-                        });
-                        Get.back();
-                      } else{
-                        Fluttertoast.showToast(msg: value['ResponseMsg']);
-                      }
-                    });
-                  }else{
-                    Fluttertoast.showToast(msg: 'Please some your text!!');
-                  }
-                },
-                child: Text('Update Car'.tr,style: TextStyle(color: Colors.white,fontFamily: FontFamily.europaBold)),
+          style: ElevatedButton.styleFrom(
+              backgroundColor: onbordingBlue,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              fixedSize: Size(Get.width, 50)
+          ),
+          onPressed: () {
+            setState(() {
+              if(carStatus != null){
+                isvalidate = false;
+              }else {
+                isvalidate = true;
+              }
+              if(ac != null){
+                isvalidate2 = false;
+              }else{
+                isvalidate2 = true;
+              }
+              if(gear != null){
+                isvalidate2 = false;
+              }else{
+                isvalidate3 = true;
+              }
+              if(multiSelect.isNotEmpty){
+                isvalidate4 = false;
+              }else{
+                isvalidate4 = true;
+              }
+              if(carType != null){
+                isvalidate5 = false;
+              }else{
+                isvalidate5 = true;
+              }
+              if(carBrand != null){
+                isvalidate6 = false;
+              }else{
+                isvalidate6 = true;
+              }
+              if(carPrice != null){
+                isvalidate7 = false;
+              }else{
+                isvalidate7 = true;
+              }
+              if(carFuel != null){
+                isvalidate8 = false;
+              }else{
+                isvalidate8 = true;
+              }
+            });
+            if(_formKey.currentState!.validate() && carStatus!= null && gear != null && multiSelect.isNotEmpty && carType != null && carBrand != null && carPrice != null && carFuel != null){
+              setState(() {
+                load1 = true;
+              });
+              update(cNumberController.text, carStatus, ratingController.text, seatController.text, ac, nameController.text, driverController.text,  mobileController.text, gear, multiSelect.join(','), carType, carBrand, dropId, withoutRent.text, withRent.text, engineController.text, carPrice, carFuel, descController.text, addressController.text, lats ?? _currentPosition?.latitude, lng ?? _currentPosition?.longitude, totalKmController.text, image.length.toString(),widget.uid == "0" ? "0" : "userData['id']", minimumController.text).then((value) {
+                // if(value["ResponseCode"] == "200"){
+                //   Fluttertoast.showToast(msg: value["ResponseMsg"]);
+                //   listCar(widget.uid == "0" ? "0" : userData['id']);
+                //   dashboard(widget.uid == "0" ? "0" : userData['id']);
+                setState(() {
+                  load1 = false;
+                });
+                Get.back();
+
+              });
+            }else{
+              Fluttertoast.showToast(msg: 'Please some your text!!');
+            }
+          },
+          child: Text('Update Car'.tr,style: TextStyle(color: Colors.white,fontFamily: FontFamily.europaBold)),
         ),
       ),
       appBar: AppBar(
+        // actions: [
+        //   IconButton(onPressed: ()async{
+        //     List<String> imageList = await uploadImages(image);
+        //     print(imageList);
+        //   },
+        // icon:Icon( Icons.add))
+        // ],
         backgroundColor: onbordingBlue,
         elevation: 0,
         centerTitle: true,
@@ -586,47 +776,47 @@ bool isvalidate8 = false;
                       isDismissible: false,
                       backgroundColor: notifire.getbgcolor,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(13))),
-                        context: context,
-                        builder: (context) {
-                          return SingleChildScrollView(
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Column(
-                                children: [
-                                  Text("From where do you want to take the photo?".tr, style: TextStyle(fontFamily: FontFamily.europaBold, fontSize: 20, color: notifire.getwhiteblackcolor),),
-                                  SizedBox(height: 15),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Expanded(
-                                        child: OutlinedButton(
-                                          style: OutlinedButton.styleFrom(fixedSize: const Size(100, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)), side: BorderSide(color: greyScale)),
-                                          onPressed: ()  {
-                                            gallery();
-                                            Get.back();
-                                          },
-                                          child:  Text("Gallery".tr, style: TextStyle(fontFamily: FontFamily.europaBold, fontSize: 15, color: notifire.getwhiteblackcolor),),
-                                        ),
+                      context: context,
+                      builder: (context) {
+                        return SingleChildScrollView(
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Column(
+                              children: [
+                                Text("From where do you want to take the photo?".tr, style: TextStyle(fontFamily: FontFamily.europaBold, fontSize: 20, color: notifire.getwhiteblackcolor),),
+                                SizedBox(height: 15),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: OutlinedButton(
+                                        style: OutlinedButton.styleFrom(fixedSize: const Size(100, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)), side: BorderSide(color: greyScale)),
+                                        onPressed: ()  {
+                                          gallery();
+                                          Get.back();
+                                        },
+                                        child:  Text("Gallery".tr, style: TextStyle(fontFamily: FontFamily.europaBold, fontSize: 15, color: notifire.getwhiteblackcolor),),
                                       ),
-                                      SizedBox(width: 13),
-                                      Expanded(
-                                        child: OutlinedButton(
-                                          style: OutlinedButton.styleFrom(fixedSize: const Size(100, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)), side: BorderSide(color: greyScale)),
-                                          onPressed: ()  {
-                                            camera();
-                                            Get.back();
-                                          },
-                                          child: Text("Camera".tr, style: TextStyle(fontFamily: FontFamily.europaBold, fontSize: 15, color: notifire.getwhiteblackcolor),),
-                                        ),
+                                    ),
+                                    SizedBox(width: 13),
+                                    Expanded(
+                                      child: OutlinedButton(
+                                        style: OutlinedButton.styleFrom(fixedSize: const Size(100, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)), side: BorderSide(color: greyScale)),
+                                        onPressed: ()  {
+                                          camera();
+                                          Get.back();
+                                        },
+                                        child: Text("Camera".tr, style: TextStyle(fontFamily: FontFamily.europaBold, fontSize: 15, color: notifire.getwhiteblackcolor),),
                                       ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 15),
-                                ],
-                              ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 15),
+                              ],
                             ),
-                          );
-                        },
+                          ),
+                        );
+                      },
                     );
                   },
                   child: Container(
@@ -855,47 +1045,47 @@ bool isvalidate8 = false;
                 isLoading ? SizedBox() :SizedBox(
                   height: 70,
                   child: ListView.builder(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: facilitylistModal?.facilitylist.length,
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: facilitylistModal?.facilitylist.length,
                       itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () {
-                        print(facilitylistModal?.facilitylist[index].id);
-                        setState(() {
-                          if(multiSelect.contains(facilitylistModal?.facilitylist[index].id)){
+                        return InkWell(
+                          onTap: () {
+                            print(facilitylistModal?.facilitylist[index].img);
                             setState(() {
-                              multiSelect.remove(facilitylistModal?.facilitylist[index].id);
+                              if(multiSelect.contains(facilitylistModal?.facilitylist[index].img)){
+                                setState(() {
+                                  multiSelect.remove(facilitylistModal?.facilitylist[index].img);
+                                });
+                              } else {
+                                setState(() {
+                                  multiSelect.add(facilitylistModal?.facilitylist[index].img);
+                                });
+                              }
                             });
-                          } else {
-                            setState(() {
-                              multiSelect.add(facilitylistModal?.facilitylist[index].id);
-                            });
-                          }
-                        });
-                      },
-                      child: Container(
-                        height: 50,
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        margin: EdgeInsets.only(right: 10, top: 10, bottom: 10),
-                        decoration: BoxDecoration(
-                          color: multiSelect.contains(facilitylistModal?.facilitylist[index].id) ?  onbordingBlue: Colors.transparent,
-                          border: Border.all(color: onbordingBlue),
-                          borderRadius: BorderRadius.circular(10)
-                        ),
-                        child: Row(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 7,horizontal: 5),
-                              child: Image.network('${Config.imgUrl}${facilitylistModal?.facilitylist[index].img}'),
+                          },
+                          child: Container(
+                            height: 50,
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            margin: EdgeInsets.only(right: 10, top: 10, bottom: 10),
+                            decoration: BoxDecoration(
+                                color: multiSelect.contains(facilitylistModal?.facilitylist[index].img) ?  onbordingBlue: Colors.transparent,
+                                border: Border.all(color: onbordingBlue),
+                                borderRadius: BorderRadius.circular(10)
                             ),
-                            SizedBox(width: 10),
-                            Text(facilitylistModal!.facilitylist[index].title,style: TextStyle(color: multiSelect.contains(facilitylistModal?.facilitylist[index].id) ?  Colors.white: onbordingBlue,fontFamily: FontFamily.europaBold,fontSize: 15)),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 7,horizontal: 5),
+                                  child: Image.network('${Config.imgUrl}${facilitylistModal?.facilitylist[index].img}'),
+                                ),
+                                SizedBox(width: 10),
+                                Text(facilitylistModal!.facilitylist[index].title,style: TextStyle(color: multiSelect.contains(facilitylistModal?.facilitylist[index].img) ?  Colors.white: onbordingBlue,fontFamily: FontFamily.europaBold,fontSize: 15)),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
                 ),
                 isvalidate4 ? Text('Please select a Facility.'.tr,style: TextStyle(color: Colors.red, fontSize: 13)) : SizedBox(),
 
@@ -1225,7 +1415,7 @@ bool isvalidate8 = false;
           position: LatLng(double.parse(_currentPosition!.latitude.toString()), double.parse(_currentPosition!.longitude.toString())),
           icon: markerIcon,
         ))
-        : markers.add(Marker(
+            : markers.add(Marker(
           markerId: const MarkerId("1"),
           position: LatLng(double.parse(latController.text.toString()), double.parse(lngController.text.toString())),
           icon: markerIcon,
@@ -1292,6 +1482,7 @@ var ac;
 var gear;
 List multiSelect1 =[];
 List multiSelect =[];
+
 List netImg = [];
 var carType;
 var carBrand;
@@ -1330,4 +1521,20 @@ edit({required String carName, required String carNumber,required String status,
   descController.text = desc;
   addressController.text = address;
   minimumController.text = minimum;
+}
+Future<List<String>> uploadImages(List<String> imagePaths) async {
+  FirebaseStorage storage = FirebaseStorage.instance;
+  List<String> downloadUrls = [];
+
+  for (String path in imagePaths) {
+    File file = File(path);
+    try {
+      TaskSnapshot snapshot = await storage.ref('featured_cars/${file.uri.pathSegments.last}').putFile(file);
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      downloadUrls.add(downloadUrl);
+    } catch (e) {
+      print('Error uploading image: $e');
+    }
+  }
+  return downloadUrls;
 }

@@ -1,15 +1,15 @@
 import 'package:carlink/screen/gerneral_support/Applanguage_screen.dart';
-import 'package:carlink/utils/Dark_lightmode.dart'; // Update with your actual import path
+import 'package:carlink/utils/Dark_lightmode.dart';
 import 'package:carlink/helpar/get_di.dart' as di;
-import 'package:carlink/screen/login_flow/splash_screen.dart'; // Update with your actual import path
+import 'package:carlink/screen/login_flow/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'Localmodal_screen.dart'; // Update with your actual import path
-import 'firebase_options.dart'; // Ensure this file is generated and correct
+import 'Localmodal_screen.dart';
+import 'firebase_options.dart';
 
 
 void main() async {
@@ -21,7 +21,6 @@ void main() async {
   
   // Initialize GetStorage
   await GetStorage.init();
-  
   await di.init();
   
   // Initialize SharedPreferences

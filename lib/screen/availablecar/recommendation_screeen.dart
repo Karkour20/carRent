@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'package:carlink/model/recommendCar_modal.dart';
 import 'package:carlink/screen/detailcar/cardetails_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'package:carlink/controller/favorite_controller.dart';
 import 'package:carlink/utils/App_content.dart';
@@ -14,6 +15,9 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
+
+import '../../model/carinfo_modal.dart';
+import '../../model/homeData_modal.dart';
 
 class recommendScreen extends StatefulWidget {
   final String title;
@@ -46,7 +50,26 @@ class _recommendScreenState extends State<recommendScreen> {
 
   ViewPopularModal? viewPopularModal;
   bool isLoading = true;
+  Future<List<FeatureCar>> featuredcars() async {
+    // Access the Firestore instance
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    // Get the collection reference
+    CollectionReference carlistsRef = firestore.collection('featuredcars');
+
+    QuerySnapshot querySnapshot = await carlistsRef.get();
+
+    // Extract data from the query snapshot
+    List<FeatureCar> featureCarList = querySnapshot.docs.map((doc) {
+      return  FeatureCar.fromJson(doc.data() as Map<String, dynamic>);
+    }).toList();
+
+    return featureCarList;
+  }
+
   Future viewFeature(uid, lats, longs, city) async {
+    List<FeatureCar> featureCar =await featuredcars();
+
     Map body = {
       "uid": uid,
       "lats": lats,
@@ -54,27 +77,31 @@ class _recommendScreenState extends State<recommendScreen> {
       "cityid": city,
     };
     try{
-      var response = await http.post(Uri.parse(Config.baseUrl+Config.viewPopular), body: jsonEncode(body), headers: {
-        'Content-Type': 'application/json',
-      });
-      if(response.statusCode == 200){
+      // var response = await http.post(Uri.parse(Config.baseUrl+Config.viewPopular), body: jsonEncode(body), headers: {
+      //   'Content-Type': 'application/json',
+      // });
+      // if(response.statusCode == 200){
         setState(() {
-          viewPopularModal = viewPopularModalFromJson(response.body);
+          viewPopularModal = ViewPopularModal(
+              responseCode: 'responseCode',
+              result: 'result',
+              responseMsg: 'responseMsg',
+              isBlock: 'isBlock', tax: "10", currency: "JOD", recommendCar: featureCar);
           isLoading = false;
           favoriteController.isLoading;
         });
-      } else {}
+     // } else {}
     }catch(e){}
   }
 
   var id;
   Future getvalidate() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    id = jsonDecode(sharedPreferences.getString('UserLogin')!);
-    var lats = jsonDecode(sharedPreferences.getString('lats')!);
-    var long = jsonDecode(sharedPreferences.getString('longs')!);
-    var dId = sharedPreferences.getString('lId');
-    viewFeature(id['id'], lats, long, dId);
+    // id = jsonDecode(sharedPreferences.getString('UserLogin')!);
+    // var lats = jsonDecode(sharedPreferences.getString('lats')!);
+    // var long = jsonDecode(sharedPreferences.getString('longs')!);
+    // var dId = sharedPreferences.getString('lId');
+    viewFeature('', 'lats', 'long', 'dId');
   }
 
   @override
@@ -112,7 +139,7 @@ class _recommendScreenState extends State<recommendScreen> {
                   itemBuilder: (context, index) {
                     return isLoading ? awailableCarShimmer() : InkWell(
                       onTap: () {
-                        Get.to(CarDetailsScreen(id: viewPopularModal!.recommendCar[index].id, currency: viewPopularModal!.currency));
+                        Get.to(CarDetailsScreen(id: viewPopularModal!.recommendCar[index].id, currency: viewPopularModal!.currency,carInfo:CarInfo(carinfo:viewPopularModal!.recommendCar[index] , galleryImages: viewPopularModal!.recommendCar[index].carImg, responseCode: "responseCode", result: "result", responseMsg: "responseMsg")));
                       },
                       child: Container(
                         height: 160,
@@ -129,7 +156,7 @@ class _recommendScreenState extends State<recommendScreen> {
                                   width: 140,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(10),
-                                    image: DecorationImage(image: NetworkImage(Config.imgUrl+viewPopularModal!.recommendCar[index].carImg),fit: BoxFit.cover),
+                                    image: DecorationImage(image: NetworkImage(Config.imgUrl+viewPopularModal!.recommendCar[index].carImg.first),fit: BoxFit.cover),
                                   ),
                                 ),
                                 SizedBox(width: 10),

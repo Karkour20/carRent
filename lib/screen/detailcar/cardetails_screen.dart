@@ -109,10 +109,8 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
       // if(response.statusCode == 200){
         setState(() {
           reviewModal = ReviewModal(responseCode: '', result: '', responseMsg: '',
-              reviewdata: [
-                Reviewdatum(userImg: "https://firebasestorage.googleapis.com/v0/b/serves-ltxnrk.appspot.com/o/car_images%2F2024-07-21T19%3A15%3A05.900740?alt=media&token=ee1fe399-e042-44bf-af3b-3f8f0ad866b7", userTitle: "userTitle", userRate: "userRate", reviewDate: DateTime.now(), userDesc: "userDesc"),
-                Reviewdatum(userImg: "https://firebasestorage.googleapis.com/v0/b/serves-ltxnrk.appspot.com/o/car_images%2F2024-07-21T19%3A15%3A05.900740?alt=media&token=ee1fe399-e042-44bf-af3b-3f8f0ad866b7", userTitle: "userTitle", userRate: "userRate", reviewDate: DateTime.now(), userDesc: "userDesc")
-              ]);
+              reviewdata: widget.carInfo!.carinfo.reviewdata
+          );
           loading = false;
         });
         // var data = jsonDecode(response.body.toString());
@@ -152,6 +150,7 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.carInfo!.carinfo.facilityImg);
     notifire = Provider.of<ColorNotifire>(context, listen: true);
     return DefaultTabController(
       length: 4,

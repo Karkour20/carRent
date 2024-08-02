@@ -41,39 +41,41 @@ class _TypeWiseScreenState extends State<TypeWiseScreen> {
 
     // Extract data from the query snapshot
     List<FeatureCar> featureCarList = querySnapshot.docs.map((doc) {
-      return FeatureCar(
-        bookeddate: List<Bookeddate>.from(doc["bookeddate"].map((x) => Bookeddate.fromFirebase(x))) ,
-
-        id: doc["id"],
-        carTitle: doc["carTitle"],
-        carImg: List<String>.from(doc["carImg"]),
-        carRating: doc["carRating"],
-        carNumber: doc["carNumber"],
-        totalSeat: doc["totalSeat"],
-        carGear: doc["carGear"],
-        carRentPrice: doc["carRentPrice"],
-        priceType: doc["priceType"],
-        engineHp: doc["engineHp"],
-        fuelType: doc["fuelType"],
-        carTypeTitle: doc["carTypeTitle"],
-        carDesc: doc["carDesc"],
-        pickLat: doc["pickLat"],
-        pickLng: doc["pickLng"],
-        pickAddress: doc["pickAddress"],
-        carFacility: doc["carFacility"],
-        isFavorite: doc["isFavorite"],
-        typeId:'',
-        cityId: '',
-        brandId: '',
-        minHrs: doc["minHrs"],
-        totalKm:doc["totalKm"],
-        facilityImg: '',
-        carTypeImg: '',
-        carBrandTitle: '',
-        carBrandImg: '',
-        carRentPriceDriver: '',
-        carAc:doc['carAc'] ,
-      );
+      return  FeatureCar.fromJson(doc.data() as Map<String, dynamic>);
+      //   FeatureCar(
+      //
+      //   bookeddate: List<Bookeddate>.from(doc["bookeddate"].map((x) => Bookeddate.fromFirebase(x))) ,
+      //
+      //   id: doc["id"],
+      //   carTitle: doc["carTitle"],
+      //   carImg: List<String>.from(doc["carImg"]),
+      //   carRating: doc["carRating"],
+      //   carNumber: doc["carNumber"],
+      //   totalSeat: doc["totalSeat"],
+      //   carGear: doc["carGear"],
+      //   carRentPrice: doc["carRentPrice"],
+      //   priceType: doc["priceType"],
+      //   engineHp: doc["engineHp"],
+      //   fuelType: doc["fuelType"],
+      //   carTypeTitle: doc["carTypeTitle"],
+      //   carDesc: doc["carDesc"],
+      //   pickLat: doc["pickLat"],
+      //   pickLng: doc["pickLng"],
+      //   pickAddress: doc["pickAddress"],
+      //   carFacility: doc["carFacility"],
+      //   isFavorite: doc["isFavorite"],
+      //   typeId:'',
+      //   cityId: '',
+      //   brandId: '',
+      //   minHrs: doc["minHrs"],
+      //   totalKm:doc["totalKm"],
+      //   facilityImg: '',
+      //   carTypeImg: '',
+      //   carBrandTitle: '',
+      //   carBrandImg: '',
+      //   carRentPriceDriver: '',
+      //   carAc:doc['carAc'] ,
+      // );
     }).toList();
 
     return featureCarList;

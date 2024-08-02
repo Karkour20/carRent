@@ -67,7 +67,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   save() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    name = jsonDecode(prefs.getString('UserLogin')!);
+    //name = jsonDecode(prefs.getString('UserLogin')!);
     print(name);
   }
 
@@ -95,14 +95,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       "uid": uid,
     };
     try{
-      var response = await http.post(Uri.parse(Config.baseUrl+Config.accountDelete), body: jsonEncode(body),headers: {
-        'Content-Type': 'application/json',
-      });
-      if(response.statusCode == 200){
-        var data = jsonDecode(response.body.toString());
-        return data;
-      } else {}
-    } catch(e){}
+      name.delete();
+    } on FirebaseException catch (e) {
+      Fluttertoast.showToast(msg: e.toString());
+
+    }
   }
   @override
   Widget build(BuildContext context) {
@@ -135,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     backgroundImage: AssetImage(Appcontent.profile),
               ),
                   const SizedBox(height: 15),
-                  Text(name.displayName.toString(), style: TextStyle(fontFamily: FontFamily.europaBold, fontSize: 18, color: WhiteColor)),
+                  Text(name.displayName.toString().split("-")[0], style: TextStyle(fontFamily: FontFamily.europaBold, fontSize: 18, color: WhiteColor)),
                   const SizedBox(height: 5),
                   Text(name.email.toString(), style: const TextStyle(fontFamily: FontFamily.europaWoff, fontSize: 15, color: Colors.white)),
                 ],
@@ -360,12 +357,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ),
                                           onPressed: () {
                                             delete("name.uid").then((value) {
-                                              if(value['ResponseCode'] == "200"){
+                                             // if(value['ResponseCode'] == "200"){
                                                 Get.offAll(const LoginScreen());
-                                                Fluttertoast.showToast(msg: value['ResponseMsg']);
-                                              } else {
-                                                Fluttertoast.showToast(msg: value['ResponseMsg']);
-                                              }
+                                                Fluttertoast.showToast(msg: 'account  deleted', timeInSecForIosWeb: 4);
+                                              // } else {
+                                              //   Fluttertoast.showToast(msg: value['ResponseMsg']);
+                                              // }
                                             });
                                           },
                                           child: Text('Yes, Remove'.tr, style: const TextStyle(fontFamily: FontFamily.europaBold, fontSize: 14, color: Colors.white))),
@@ -414,7 +411,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                 ),
                   onPressed: () {
-                    resetNew();
+                   // resetNew();
+                    FirebaseAuth.instance.signOut();
                     Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (route) => false);
                   },
                   child: Text('Log Out'.tr, style: TextStyle(fontSize: 15, color: onbordingBlue, fontFamily: FontFamily.europaBold)),

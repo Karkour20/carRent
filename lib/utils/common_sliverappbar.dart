@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:carlink/utils/App_content.dart';
 import 'package:carlink/utils/Colors.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:carlink/utils/Dark_lightmode.dart';
@@ -39,6 +42,7 @@ class _CollapsingAppBarPageState extends State<CollapsingAppBarPage> with Single
   @override
   void initState() {
     super.initState();
+    isFavorite();
     //validate();
     _scrollController = ScrollController()
       ..addListener(() {
@@ -56,6 +60,24 @@ class _CollapsingAppBarPageState extends State<CollapsingAppBarPage> with Single
     super.dispose();
   }
   final controller = PageController();
+  CollectionReference<Map<String, dynamic>> collection=FirebaseFirestore.instance.collection('users')
+      .doc(FirebaseAuth.instance.currentUser!.uid).
+  collection('favorite');
+
+  isFavorite() async {
+
+    collection.doc(widget.Id).snapshots().listen((event) {
+      if(event.exists){
+        setState(() {
+          isLike = true;
+        });
+      }else{
+        setState(() {
+          isLike = false;
+        });
+      }
+    });
+  }
 
   late ColorNotifire notifire;
   bool isLike = false;
@@ -66,13 +88,21 @@ class _CollapsingAppBarPageState extends State<CollapsingAppBarPage> with Single
       "car_id": carId,
     };
     try{
-      var response = await http.post(Uri.parse(Config.baseUrl+Config.uFav), body: jsonEncode(body), headers: {
-        'Content-Type': 'application/json',
-      });
-      if(response.statusCode == 200){
-        var data = jsonDecode(response.body.toString());
-        return data;
-      } else {}
+      // var response = await http.post(Uri.parse(Config.baseUrl+Config.uFav), body: jsonEncode(body), headers: {
+      //   'Content-Type': 'application/json',
+      // });
+      // if(response.statusCode == 200){
+      //   var data = jsonDecode(response.body.toString());
+      //   return data;
+      // } else {}
+      if(isLike == false){
+        await collection.doc(widget.Id).set(widget.carInfo!.carinfo.toFirebase());
+        Fluttertoast.showToast(msg: 'car added to favorite'.tr,timeInSecForIosWeb: 4);
+
+      }else{
+        await collection.doc(widget.Id).delete();
+        Fluttertoast.showToast(msg: 'car removed from favorite'.tr,timeInSecForIosWeb: 4);
+      }
     }catch(e) {}
   }
   var userId;
@@ -80,11 +110,14 @@ class _CollapsingAppBarPageState extends State<CollapsingAppBarPage> with Single
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     //userId = jsonDecode(sharedPreferences.getString('UserLogin')!);
     if(widget.favorite == "1"){
-      isLike = true;
-      setState(() {});
+      setState(() {
+        isLike = true;
+
+      });
     }else{
-      isLike = false;
-      setState(() {});
+      setState(() {
+        isLike = false;
+      });
     }
     carInfo(userId['id']);
   }
@@ -170,17 +203,8 @@ class _CollapsingAppBarPageState extends State<CollapsingAppBarPage> with Single
         actions: [
           InkWell(
             onTap: () {
-              favorite(userId['id'], widget.Id).then((value) {
-                if(value["ResponseCode"] == "200") {
-                  setState(() {
-                    isLike = !isLike;
-                  });
-                  _controller.reverse().then((value) => _controller.forward());
-                  Fluttertoast.showToast(msg: value['ResponseMsg']);
-                } else{
-                  Fluttertoast.showToast(msg: value['ResponseMsg']);
-                }
-              });
+
+              favorite('', widget.Id);
             },
             child: Container(
               height: 40,

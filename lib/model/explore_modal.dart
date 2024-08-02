@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'homeData_modal.dart';
+
 ExploreModal exploreModalFromJson(String str) => ExploreModal.fromJson(json.decode(str));
 
 String exploreModalToJson(ExploreModal data) => json.encode(data.toJson());
@@ -12,7 +14,7 @@ class ExploreModal {
   String responseCode;
   String result;
   String responseMsg;
-  List<ExploreFeatureCar> featureCar;
+  List<FeatureCar> featureCar;
 
   ExploreModal({
     required this.responseCode,
@@ -25,7 +27,7 @@ class ExploreModal {
     responseCode: json["ResponseCode"],
     result: json["Result"],
     responseMsg: json["ResponseMsg"],
-    featureCar: List<ExploreFeatureCar>.from(json["FeatureCar"].map((x) => ExploreFeatureCar.fromJson(x))),
+    featureCar: List<FeatureCar>.from(json["FeatureCar"].map((x) => FeatureCar.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {

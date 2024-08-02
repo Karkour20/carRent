@@ -44,6 +44,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
       String user =  pref.getString("Usertype") ?? "";
       if(user == "ADMIN"){
+     //if(true){
 
         Timer(const Duration(seconds: 3), () {
           Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const CarInfoScreen()), (route) => false);
@@ -76,7 +77,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     notifire = Provider.of<ColorNotifire>(context, listen: true);
     return Scaffold(
-        backgroundColor: notifire.getbgcolor,
+        backgroundColor:Color(0xff1a1a1a),
         body: Container(
           height: Get.size.height,
           width: Get.size.width,
@@ -86,7 +87,7 @@ class _SplashScreenState extends State<SplashScreen> {
             children: [
               Image.asset(Appcontent.appLogo,height: 165,),
               const SizedBox(height: 15),
-              Text('carlink',style: TextStyle(fontFamily: FontFamily.europaBold, fontSize: 39, color: notifire.getwhiteblackcolor)),
+              //Text('carlink',style: TextStyle(fontFamily: FontFamily.europaBold, fontSize: 39, color: notifire.getwhiteblackcolor)),
             ],
           ),
         ));

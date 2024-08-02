@@ -6,6 +6,7 @@ import 'package:carlink/utils/Dark_lightmode.dart';
 import 'package:carlink/utils/common.dart';
 import 'package:carlink/utils/config.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../controller/favorite_controller.dart';
+import '../../model/bookdetails_modal.dart';
 import '../../model/mybookhistory_modal.dart';
 import '../../utils/App_content.dart';
 import 'package:http/http.dart' as http;
@@ -58,12 +60,15 @@ class _MyBookingDetailScreenState extends State<MyBookingDetailScreen> {
       "book_id": bId,
     };
     try{
-      var response = await http.post(Uri.parse(Config.baseUrl+Config.myBookDetails), body: jsonEncode(body), headers: {
-        'Content-Type': 'application/json',
-      });
-      if(response.statusCode == 200){
-        setState(() {
-          myBookDetailModal = myBookDetailModalFromJson(response.body);
+      var data=await FirebaseFirestore.instance.collection("Books").doc( bId)
+      //.where("status",isEqualTo: status)
+          .get();
+      // if(response.statusCode == 200){
+      setState(() {
+        myBookDetailModal = MyBookDetailModal(
+            bookDetails: [
+              BookDetail.fromJson(data.data()!)
+            ], responseCode: 'responseCode', result: 'result', responseMsg: 'responseMsg');
           image = myBookDetailModal!.bookDetails[inDex].carImg.toString().split("\$;");
           isLoading = false;
         });
@@ -75,7 +80,7 @@ class _MyBookingDetailScreenState extends State<MyBookingDetailScreen> {
           listOfUrls1.add("${Config.imgUrl}${myBookDetailModal!.bookDetails[0].interPhoto[i]}");
           setState(() {});
         }
-      } else {}
+     // } else {}
     }catch(e){}
   }
 
@@ -106,19 +111,21 @@ class _MyBookingDetailScreenState extends State<MyBookingDetailScreen> {
       });
       if(response.statusCode == 200){
         setState(() {
-          myBookingHistoryModal = myBookingHistoryModalFromJson(response.body);
+          //myBookingHistoryModal = myBookingHistoryModalFromJson(response.body);
           isLoading = false;
         });
       } else {}
     }catch(e){}
   }
   var id;
-  var currencies;
+  var  currencies = {
+    'currency':"JOD"
+  };
   Future getvalidate() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    id = widget.uid == "0" ? "0" : jsonDecode(sharedPreferences.getString('UserLogin')!);
-    currencies =widget.uid == "0" ? "0" : jsonDecode(sharedPreferences.getString('bannerData')!);
-    bDetail(widget.uid == "0"? "0" : id['id'], widget.bookId);
+    // SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    // id = widget.uid == "0" ? "0" : jsonDecode(sharedPreferences.getString('UserLogin')!);
+    // currencies =widget.uid == "0" ? "0" : jsonDecode(sharedPreferences.getString('bannerData')!);
+    bDetail('', widget.bookId);
   }
   late ColorNotifire notifire;
   late GoogleMapController mapController;
@@ -205,7 +212,7 @@ class _MyBookingDetailScreenState extends State<MyBookingDetailScreen> {
                     TextSpan(text: 'Great news! Your car pickup is complete. '.tr, style: TextStyle(fontFamily: FontFamily.europaWoff, color: notifire.getgreycolor, fontSize: 14)),
                     TextSpan(text: '[${myBookDetailModal?.bookDetails[0].customerName} - ${myBookDetailModal?.bookDetails[0].customerContact}] ', style: TextStyle(fontFamily: FontFamily.europaBold, color: onbordingBlue, fontSize: 14)),
                     TextSpan(text: 'will drop it off at your provided location by '.tr, style: TextStyle(fontFamily: FontFamily.europaWoff, color: notifire.getgreycolor, fontSize: 14)),
-                    TextSpan(text: '${myBookDetailModal!.bookDetails[0].pickupDate.toString().split(" ").first} ${DateFormat('hh:mm a').format(DateTime.parse('${myBookDetailModal!.bookDetails[0].pickupDate.toString().split(" ").first} ${myBookDetailModal!.bookDetails[0].pickupTime}'))} - ${myBookDetailModal!.bookDetails[0].returnDate.toString().split(" ").first} ${DateFormat('hh:mm a').format(DateTime.parse('${myBookDetailModal!.bookDetails[0].returnDate.toString().split(" ").first} ${myBookDetailModal!.bookDetails[0].returnTime}'))}.', style: TextStyle(fontFamily: FontFamily.europaBold, color: onbordingBlue, fontSize: 14)),
+                    TextSpan(text: '${myBookDetailModal!.bookDetails[0].pickupDate.toString().split(" ").first}  ${myBookDetailModal!.bookDetails[0].pickupTime} - ${myBookDetailModal!.bookDetails[0].returnDate.toString().split(" ").first} ${myBookDetailModal!.bookDetails[0].returnTime}.', style: TextStyle(fontFamily: FontFamily.europaBold, color: onbordingBlue, fontSize: 14)),
                   ],
                 )),
               ),
@@ -763,7 +770,7 @@ class _MyBookingDetailScreenState extends State<MyBookingDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Pick-up'.tr, maxLines: 1, style: TextStyle(fontFamily: FontFamily.europaWoff, color: notifire.getgreycolor, fontSize: 15, overflow: TextOverflow.ellipsis)),
-                              Text('${myBookDetailModal!.bookDetails[index].pickupDate.toString().split(" ").first} - ${DateFormat('hh:mm a').format(DateTime.parse('${myBookDetailModal!.bookDetails[index].pickupDate.toString().split(" ").first} ${myBookDetailModal!.bookDetails[index].pickupTime}'))}', maxLines: 1, style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 13, overflow: TextOverflow.ellipsis)),
+                              Text('${myBookDetailModal!.bookDetails[index].pickupDate.toString().split(" ").first} - ${myBookDetailModal!.bookDetails[index].pickupTime}', maxLines: 1, style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 13, overflow: TextOverflow.ellipsis)),
                             ],
                           ),
                           const Spacer(),
@@ -771,7 +778,7 @@ class _MyBookingDetailScreenState extends State<MyBookingDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Drop-off'.tr, style: TextStyle(fontFamily: FontFamily.europaWoff, color: notifire.getgreycolor, fontSize: 15, overflow: TextOverflow.ellipsis)),
-                              Text('${myBookDetailModal!.bookDetails[index].returnDate.toString().split(" ").first} - ${DateFormat('hh:mm a').format(DateTime.parse('${myBookDetailModal!.bookDetails[index].returnDate.toString().split(" ").first} ${myBookDetailModal!.bookDetails[index].returnTime}'))}', style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 13, overflow: TextOverflow.ellipsis)),
+                              Text('${myBookDetailModal!.bookDetails[index].returnDate.toString().split(" ").first} - ${myBookDetailModal!.bookDetails[index].returnTime}', style: TextStyle(fontFamily: FontFamily.europaBold, color: notifire.getwhiteblackcolor, fontSize: 13, overflow: TextOverflow.ellipsis)),
                             ],
                           ),
                           const SizedBox(width: 13),

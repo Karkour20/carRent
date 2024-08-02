@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'homeData_modal.dart';
+
 MyCarListModal myCarListModalFromJson(String str) => MyCarListModal.fromJson(json.decode(str));
 
 String myCarListModalToJson(MyCarListModal data) => json.encode(data.toJson());
@@ -12,7 +14,7 @@ class MyCarListModal {
   String responseCode;
   String result;
   String responseMsg;
-  List<Mycarlist> mycarlist;
+  List<FeatureCar> mycarlist;
 
   MyCarListModal({
     required this.responseCode,
@@ -25,7 +27,7 @@ class MyCarListModal {
     responseCode: json["ResponseCode"],
     result: json["Result"],
     responseMsg: json["ResponseMsg"],
-    mycarlist: List<Mycarlist>.from(json["mycarlist"].map((x) => Mycarlist.fromJson(x))),
+    mycarlist: List<FeatureCar>.from(json["mycarlist"].map((x) => FeatureCar.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {

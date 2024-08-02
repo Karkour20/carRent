@@ -48,7 +48,7 @@ class Cartypelist {
   });
 
   factory Cartypelist.fromJson(Map<String, dynamic> json) => Cartypelist(
-    id: json["id"],
+    id: json["id"].toString(),
     title: json["title"],
     img: json["img"],
   );

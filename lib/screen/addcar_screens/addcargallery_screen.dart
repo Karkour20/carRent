@@ -22,6 +22,8 @@ class AddCarGalleryScreen extends StatefulWidget {
   final String? carTitle;
   final String? id;
   final String? uid;
+
+
   const AddCarGalleryScreen({super.key, required this.title, this.id, this.carTitle, this.uid});
 
   @override

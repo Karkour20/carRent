@@ -117,12 +117,12 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
         lController.cityList().then((value) {
           set();
 
-          lController.commonBottomSheet(context).then((value) {
-            setLocal();
-            homeBanner(id['id'], loId);
-            locationSave();
-            setState(() {});
-          });
+          // lController.commonBottomSheet(context).then((value) {
+          //   setLocal();
+          //   homeBanner(id['id'], loId);
+          //   locationSave();
+          //   setState(() {});
+          // });
         });
       } else {}
     });

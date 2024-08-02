@@ -10,11 +10,14 @@ import 'package:carlink/utils/common_ematy.dart';
 import 'package:carlink/utils/common.dart';
 import 'package:carlink/utils/config.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../model/bookrange_modal.dart';
+import '../../model/homeData_modal.dart';
 import '../../utils/fontfameli_model.dart';
 
 class ListCarScreen extends StatefulWidget {
@@ -37,25 +40,76 @@ class _ListCarScreenState extends State<ListCarScreen> {
   List temp=[];
   MyCarListModal? myCarListModal;
   bool isLoading =true;
+  Future<List<FeatureCar>> featuredcars() async {
+    // Access the Firestore instance
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    // Get the collection reference
+    CollectionReference carlistsRef = firestore.collection('featuredcars');
+
+    QuerySnapshot querySnapshot = await carlistsRef.get();
+
+    // Extract data from the query snapshot
+    List<FeatureCar> featureCarList = querySnapshot.docs.map((doc) {
+      return  FeatureCar.fromJson(doc.data() as Map<String, dynamic>);
+      //   FeatureCar(
+      //
+      //   id: doc["id"],
+      //   carTitle: doc["carTitle"],
+      //   carImg: List<String>.from(doc["carImg"]),
+      //   carRating: doc["carRating"],
+      //   carNumber: doc["carNumber"],
+      //   totalSeat: doc["totalSeat"],
+      //   carGear: doc["carGear"],
+      //   carRentPrice: doc["carRentPrice"],
+      //   priceType: doc["priceType"],
+      //   engineHp: doc["engineHp"],
+      //   fuelType: doc["fuelType"],
+      //   carTypeTitle: doc["carTypeTitle"],
+      //   carDesc: doc["carDesc"],
+      //   pickLat: doc["pickLat"],
+      //   pickLng: doc["pickLng"],
+      //   pickAddress: doc["pickAddress"],
+      //   carFacility: doc["carFacility"],
+      //   isFavorite: doc["isFavorite"],
+      //   typeId:'',
+      //   cityId: '',
+      //   brandId: '',
+      //   minHrs: doc["minHrs"],
+      //   totalKm:doc["totalKm"],
+      //   facilityImg: '',
+      //   carTypeImg: '',
+      //   carBrandTitle: '',
+      //   carBrandImg: '',
+      //   carRentPriceDriver: '',
+      //   carAc:doc['carAc'],
+      //   bookeddate: List<Bookeddate>.from(doc["bookeddate"].map((x) => Bookeddate.fromFirebase(x))) ,
+      // );
+    }).toList();
+
+    return featureCarList;
+  }
   Future listCar(uId) async {
+    List<FeatureCar> mycarlist = await featuredcars();
     Map body ={
       "uid": uId,
     };
     try{
-      var response = await http.post(Uri.parse(Config.baseUrl+Config.carList),body: jsonEncode(body), headers: {
-        'Content-Type': 'application/json',
-      });
-      if(response.statusCode == 200){
+
+      //if(response.statusCode == 200){
         setState(() {
-          myCarListModal = myCarListModalFromJson(response.body);
+          myCarListModal = MyCarListModal(
+              responseCode: 'responseCode',
+              result: 'result',
+              responseMsg: 'responseMsg', mycarlist: mycarlist);
           isLoading =false;
         });
         for(int i=0; i<myCarListModal!.mycarlist.length; i++){
           temp.add(0);
         }
-        var data = jsonDecode(response.body.toString());
-        return data;
-      } else{}
+        // var data = jsonDecode(response.body.toString());
+        // return data;
+      //} else{}
     } catch(e){
       debugPrint(e.toString());
     }
@@ -63,9 +117,9 @@ class _ListCarScreenState extends State<ListCarScreen> {
 
   var id;
   Future getvalidate() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    id = widget.uid == "0" ? "0" : jsonDecode(sharedPreferences.getString('UserLogin')!);
-    listCar(widget.uid == "0" ? "0" :id['id']);
+    // SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    // id = widget.uid == "0" ? "0" : jsonDecode(sharedPreferences.getString('UserLogin')!);
+    listCar("");
   }
 
   final CarouselController carouselController = CarouselController();
@@ -165,7 +219,7 @@ class _ListCarScreenState extends State<ListCarScreen> {
                                   margin: const EdgeInsets.only(left: 5,right: 5,top: 5),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
-                                    image: DecorationImage(image: NetworkImage('${Config.imgUrl}${myCarListModal!.mycarlist[index].carImg}'), fit: BoxFit.cover),
+                                    image: DecorationImage(image: NetworkImage('${Config.imgUrl}${myCarListModal!.mycarlist[index].carImg.first}'), fit: BoxFit.cover),
                                   ),
                                 ),
                                 Container(
@@ -245,35 +299,35 @@ class _ListCarScreenState extends State<ListCarScreen> {
                                   Row(
                                     children: [
                                       // Car Gallery Add and Edit
-                                      myCarListModal?.mycarlist[index].totalGallery == 0 ? InkWell(
-                                        onTap: () {
-                                          eButton = true;
-                                          Get.to( AddCarGalleryScreen(title: 'Add Car ', uid: widget.uid,id: myCarListModal?.mycarlist[index].id, carTitle: myCarListModal?.mycarlist[index].carTitle))!.then((value) {
-                                            setState(() {
-                                              listCar(widget.uid == "0" ? "0" :id['id']);
-                                            });
-                                          });
-                                        },
-                                        child: blurTitle(title: 'Add Gallery'.tr,context: context),
-                                      ) : InkWell(
-                                        onTap: () {
-                                          eButton = false;
-                                          Get.to(AddCarGalleryScreen(title: 'Edit Car '.tr,id: myCarListModal?.mycarlist[index].id, carTitle: myCarListModal?.mycarlist[index].carTitle, uid: widget.uid))!.then((value) {
-                                            setState(() {
-                                              listCar(widget.uid == "0" ? "0" :id['id']);
-                                            });
-                                          });
-                                        },
-                                        child: blurTitle(title: 'Edit Gallery'.tr,context: context),
-                                      ),
+                                      // myCarListModal?.mycarlist[index].carImg.length == 0 ? InkWell(
+                                      //   onTap: () {
+                                      //     eButton = true;
+                                      //     Get.to( AddCarGalleryScreen(title: 'Add Car ', uid: widget.uid,id: myCarListModal?.mycarlist[index].id, carTitle: myCarListModal?.mycarlist[index].carTitle))!.then((value) {
+                                      //       setState(() {
+                                      //         listCar(widget.uid == "0" ? "0" :id['id']);
+                                      //       });
+                                      //     });
+                                      //   },
+                                      //   child: blurTitle(title: 'Add Gallery'.tr,context: context),
+                                      // ) : InkWell(
+                                      //   onTap: () {
+                                      //     eButton = false;
+                                      //     Get.to(AddCarGalleryScreen(title: 'Edit Car '.tr,id: myCarListModal?.mycarlist[index].id, carTitle: myCarListModal?.mycarlist[index].carTitle, uid: widget.uid))!.then((value) {
+                                      //       setState(() {
+                                      //         listCar('');
+                                      //       });
+                                      //     });
+                                      //   },
+                                      //   child: blurTitle(title: 'Edit Gallery'.tr,context: context),
+                                      // ),
                                       // Car Edit
                                       InkWell(
                                         onTap: () {
                                           button = false;
-                                          edit(carName: myCarListModal!.mycarlist[index].carTitle,carNumber: myCarListModal!.mycarlist[index].carNumber, status: myCarListModal!.mycarlist[index].carStatus, uploadImage: image, AC: myCarListModal!.mycarlist[index].carAc, driverName: myCarListModal!.mycarlist[index].driverName, countryCode: myCarListModal!.mycarlist[index].driverMobile.toString().split(" ").first, mobile: myCarListModal!.mycarlist[index].driverMobile.toString().split(" ").last, rating: myCarListModal!.mycarlist[index].carRating, seat: myCarListModal!.mycarlist[index].totalSeat, carGear: myCarListModal!.mycarlist[index].carGear,carFacility: myCarListModal!.mycarlist[index].carFacility, type: myCarListModal!.mycarlist[index].carType, brand: myCarListModal!.mycarlist[index].carBrand, location: myCarListModal!.mycarlist[index].carAvailable, without: myCarListModal!.mycarlist[index].carRentPrice, withrent: myCarListModal!.mycarlist[index].carRentPriceDriver, engine: myCarListModal!.mycarlist[index].engineHp, pType: myCarListModal!.mycarlist[index].priceType, fuel: myCarListModal!.mycarlist[index].fuelType, lat: myCarListModal!.mycarlist[index].pickLat, long: myCarListModal!.mycarlist[index].pickLng, totalKm: myCarListModal!.mycarlist[index].totalKm, desc: myCarListModal!.mycarlist[index].carDesc, address: myCarListModal!.mycarlist[index].pickAddress, minimum: myCarListModal!.mycarlist[index].minHrs);
+                                          edit(carName: myCarListModal!.mycarlist[index].carTitle,carNumber: myCarListModal!.mycarlist[index].carNumber, status: "Publish", uploadImage: image, AC: myCarListModal!.mycarlist[index].carAc, driverName: "karkour", countryCode: "+942", mobile: "+942635754680", rating: myCarListModal!.mycarlist[index].carRating, seat: myCarListModal!.mycarlist[index].totalSeat, carGear: myCarListModal!.mycarlist[index].carGear,carFacility: myCarListModal!.mycarlist[index].carFacility, type: myCarListModal!.mycarlist[index].carTypeTitle, brand: myCarListModal!.mycarlist[index].carBrandTitle, location: myCarListModal!.mycarlist[index].pickAddress, without: myCarListModal!.mycarlist[index].carRentPrice, withrent: myCarListModal!.mycarlist[index].carRentPriceDriver, engine: myCarListModal!.mycarlist[index].engineHp, pType: myCarListModal!.mycarlist[index].priceType, fuel: myCarListModal!.mycarlist[index].fuelType, lat: myCarListModal!.mycarlist[index].pickLat, long: myCarListModal!.mycarlist[index].pickLng, totalKm: myCarListModal!.mycarlist[index].totalKm, desc: myCarListModal!.mycarlist[index].carDesc, address: myCarListModal!.mycarlist[index].pickAddress, minimum: myCarListModal!.mycarlist[index].minHrs);
                                           Get.to(AddCarScreen(id: index.toString(),uid: widget.uid, recordId: myCarListModal?.mycarlist[index].id, title: myCarListModal?.mycarlist[index].carTitle))!.then((value) {
                                             setState(() {
-                                              listCar(widget.uid == "0" ? "0" :id['id']);
+                                              listCar('');
                                             });
                                           });
                                         },
